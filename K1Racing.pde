@@ -1,33 +1,19 @@
-/*
- * Title: K1 Racing
- * Description: Formula 1 inspired racing game.
- * Date Created: April 22, 2025
- * Date Last Modified: June 8, 2025
-*/
-
 // Class for the track.
 class Track
 {
   PVector position;
-  int outerTrackWidth;
-  int outerTrackHeight;
-  int innerTrackWidth;
-  int innerTrackHeight;
-  int trackY;
-  float bounceBackVelocity;
-  float bounceBackSpeed;
+  static final float OUTER_TRACK_WIDTH = 6000f;
+  static final float OUTER_TRACK_HEIGHT = 3000f;
+  static final float INNER_TRACK_WIDTH = OUTER_TRACK_WIDTH - 1000f;
+  static final float INNER_TRACK_HEIGHT = OUTER_TRACK_HEIGHT - 1000f;
+  static final float COLLISION_VEL_MULT = -0.45f;
+  static final float COLLISION_SPEED_MULT = -1.1f;
+  float offsetY = 5;
   
   // Constructor method.
   Track(float x, float y, float z)
   {
     position = new PVector(x, y, z);
-    outerTrackWidth = 6000;
-    outerTrackHeight = 3000;
-    innerTrackWidth = outerTrackWidth - 1000;
-    innerTrackHeight = outerTrackHeight - 1000;
-    bounceBackVelocity = -0.45;
-    bounceBackSpeed = -1.1;
-    trackY = 5;
   }
   
   // Displays the track.
@@ -35,43 +21,43 @@ class Track
   {
     // Outer ellipse; the track colour of the ellipse.
     pushMatrix();
-    translate(0, trackY + 3, 0);
+    translate(0, offsetY + 3, 0);
     rotateX(PI/2);
     strokeWeight(6);
     stroke(255);
     fill(#575756);
-    ellipse(0, 0, outerTrackWidth, outerTrackHeight);
+    ellipse(0, 0, OUTER_TRACK_WIDTH, OUTER_TRACK_HEIGHT);
     stroke(25);
     
-    // Wow this is ugly. Adds the extra grey lines in the track.
-    ellipse(0, 0, outerTrackWidth - (outerTrackWidth - innerTrackWidth) / 2, outerTrackHeight - (outerTrackHeight - innerTrackHeight) / 2);
-    ellipse(0, 0, outerTrackWidth - (outerTrackWidth - innerTrackWidth) / 4, outerTrackHeight - (outerTrackHeight - innerTrackHeight) / 4);
-    ellipse(0, 0, (outerTrackWidth - 3*(outerTrackWidth - innerTrackWidth) / 4), (outerTrackHeight - 3*(outerTrackHeight - innerTrackHeight) / 4));
+    // Adds the extra grey lines in the track every quarter of way in,
+    ellipse(0, 0, OUTER_TRACK_WIDTH - (OUTER_TRACK_WIDTH - INNER_TRACK_WIDTH) / 2, OUTER_TRACK_HEIGHT - (OUTER_TRACK_HEIGHT - INNER_TRACK_HEIGHT) / 2);
+    ellipse(0, 0, OUTER_TRACK_WIDTH - (OUTER_TRACK_WIDTH - INNER_TRACK_WIDTH) / 4, OUTER_TRACK_HEIGHT - (OUTER_TRACK_HEIGHT - INNER_TRACK_HEIGHT) / 4);
+    ellipse(0, 0, (OUTER_TRACK_WIDTH - 3*(OUTER_TRACK_WIDTH - INNER_TRACK_WIDTH) / 4), (OUTER_TRACK_HEIGHT - 3*(OUTER_TRACK_HEIGHT - INNER_TRACK_HEIGHT) / 4));
     popMatrix();
     
     // Inner ellipse; colours inside of the outer ellipse ground colour.
     pushMatrix();
-    translate(0, trackY + 2, 0);
+    translate(0, offsetY + 2, 0);
     rotateX(PI/2);
     stroke(255);
     fill(#99EDC3);
-    ellipse(0, 0, innerTrackWidth, innerTrackHeight);
+    ellipse(0, 0, INNER_TRACK_WIDTH, INNER_TRACK_HEIGHT);
     popMatrix();
     
     // Variables for the finish line.
     int squareSize = 50;
-    int squareNum = ((outerTrackHeight - innerTrackHeight) / (2*squareSize));
+    float numberOfSquares = ((OUTER_TRACK_HEIGHT - INNER_TRACK_HEIGHT) / (2*squareSize));
     
     // Draw the finish line for the track: ROW 1.
     pushMatrix();
     noLights();
-    translate(-50, trackY + 2, outerTrackHeight/2);
+    translate(-50, offsetY + 2, OUTER_TRACK_HEIGHT/2);
     noStroke();
     strokeWeight(2);
     rotateX(PI / 2);
     
     // Draws the appropriate number of boxes and splits the gaps for alternating black and white.
-    for(int i = 1; i <= squareNum; i++)
+    for(int i = 1; i <= numberOfSquares; i++)
     {
       // White box.
       if (i % 2 == 0)
@@ -92,12 +78,12 @@ class Track
     
     // Draw the finish line for the track: ROW 2.
     pushMatrix();
-    translate(-100, trackY + 2, outerTrackHeight/2);
+    translate(-100, offsetY + 2, OUTER_TRACK_HEIGHT/2);
     rotateX(PI / 2);
     noLights();
     
     // Draws the appropriate number of boxes and splits the gaps for alternating black and white; flips order to make checkered pattern.
-    for(int i = 1; i <= squareNum; i++)
+    for(int i = 1; i <= numberOfSquares; i++)
     {
       // Black box.
       if (i % 2 == 0)
@@ -120,24 +106,24 @@ class Track
   // Displays the F1 style walls.
   void displayWalls()
   {
-    int barrierHeight = 35;
+    float barrierHeight = 35;
     
     // Outer barrier; red and white striped like F1
-    for (int angle = 0; angle < 360; angle += 5)
+    for (int angleDeg = 0; angleDeg < 360; angleDeg += 5)
     {
       // Current and next variables.
-      float angleRad = radians(angle);
-      float x = cos(angleRad) * (outerTrackWidth/2 + 25);
-      float z = sin(angleRad) * (outerTrackHeight/2 + 25);
-      float nextAngle = radians(angle + 5);
-      float nextX = cos(nextAngle) * (outerTrackWidth/2 + 25);
-      float nextZ = sin(nextAngle) * (outerTrackHeight/2 + 25);
+      float angleRad = radians(angleDeg);
+      float x = cos(angleRad) * (OUTER_TRACK_WIDTH/2 + 25);
+      float z = sin(angleRad) * (OUTER_TRACK_HEIGHT/2 + 25);
+      float nextAngle = radians(angleDeg + 5);
+      float nextX = cos(nextAngle) * (OUTER_TRACK_WIDTH/2 + 25);
+      float nextZ = sin(nextAngle) * (OUTER_TRACK_HEIGHT/2 + 25);
       
       pushMatrix(); 
-      translate((x + nextX)/2, trackY - barrierHeight/2, (z + nextZ)/2);
+      translate((x + nextX)/2, offsetY - barrierHeight/2, (z + nextZ)/2);
       
       // Alternate red and white sections
-      if ((angle / 5) % 2 == 0)
+      if ((angleDeg / 5) % 2 == 0)
       {
         fill(255, 0, 0);
       }
@@ -155,17 +141,17 @@ class Track
     }
     
     // Inner barrier; stacked tires.
-    for (int angle = 0; angle < 360; angle += 1)
+    for (int angleDeg = 0; angleDeg < 360; angleDeg += 1)
     {
-      float radians = radians(angle);
-      float x = cos(radians) * (innerTrackWidth/2 - 25);
-      float z = sin(radians) * (innerTrackHeight/2 - 25);
+      float angleRad = radians(angleDeg);
+      float x = cos(angleRad) * (INNER_TRACK_WIDTH/2 - 25);
+      float z = sin(angleRad) * (INNER_TRACK_HEIGHT/2 - 25);
       
       // Simple stacked tire boxes
       for (int i = 0; i < 2; i++)
       {
         pushMatrix();
-        translate(x, trackY + (i * 15) - 10, z);
+        translate(x, offsetY + (i * 15) - 10, z);
         fill(40, 40, 40);
         noStroke();
         box(25, 13, 25);
@@ -178,66 +164,68 @@ class Track
   void checkWallCollision(Kart kart)
   {
     // Checks user equation of an ellipse.
-    float outerCheck = sq(kart.position.x / (gameTrack.outerTrackWidth / 2)) + sq(kart.position.z / (gameTrack.outerTrackHeight / 2));
-    float innerCheck = sq(kart.position.x / (gameTrack.innerTrackWidth / 2)) + sq(kart.position.z / (gameTrack.innerTrackHeight / 2));
+    float outerCheck = sq(kart.position.x / (Track.OUTER_TRACK_WIDTH / 2)) + sq(kart.position.z / (Track.OUTER_TRACK_HEIGHT / 2));
+    float innerCheck = sq(kart.position.x / (Track.INNER_TRACK_WIDTH / 2)) + sq(kart.position.z / (Track.INNER_TRACK_HEIGHT / 2));
     
     // If the equation of the outer ellipse is greater than 1, it brings the kart back by bouncing it in.
-    if (outerCheck >= 0.9875)
+    final float OUTER_BOUNDARY = 0.9875f;
+    if (outerCheck >= OUTER_BOUNDARY)
     {
-      kart.velocity.mult(bounceBackVelocity);
-      kart.speed *= bounceBackSpeed;
+      kart.velocity.mult(COLLISION_VEL_MULT);
+      kart.speed *= COLLISION_SPEED_MULT;
     }
     
     // If equation of the inner ellipse is less than 1, it brings the kart back by bouncing it in.
-    if (innerCheck <= 1.0125)
+    final float INNER_BOUNDARY = 1.0125f;
+    if (innerCheck <= INNER_BOUNDARY)
     {
-      kart.velocity.mult(bounceBackVelocity);
+      kart.velocity.mult(COLLISION_VEL_MULT);
       kart.position.add(kart.velocity);
-      kart.speed *= bounceBackSpeed;
+      kart.speed *= COLLISION_SPEED_MULT;
     }
   }
   
   // Draws the ground for the map.
   void displayGround()
   {
-    int groundSize = 8000;
+    final float SIZE_OF_GROUND = 8000f;
     
     pushMatrix();
-    translate(0, trackY + 5, 0);
+    translate(0, offsetY + 5, 0);
     fill(#99EDC3);
     noStroke();
     rotateX(PI/2);
-    ellipse(0, 0, groundSize, groundSize/2);
+    ellipse(0, 0, SIZE_OF_GROUND, SIZE_OF_GROUND/2);
     popMatrix(); 
   }
   
   // Draws the bleachers.
   void displayStadium()
   {
-    int bleacherRows = 8;
-    int bleacherHeight = 35;
-    int bleacherDepth = 65;
-    float stadiumRadius = outerTrackWidth/2 + 500; // Distance from track center
+    final float BLEACHER_ROWS = 8f;
+    final float BLEACHER_HEIGHT = 35f;
+    final float BLEACHER_DEPTH = 65f;
+    final float STADIUM_RADIUS = OUTER_TRACK_WIDTH/2 + 500; // Distance from track center
     
-    // Create bleachers in sections around the track - smaller angle increment for continuous connection
-    for (int angle = 0; angle < 360; angle += 1)
+    // Create bleachers in sections around the track - smaller ANGLE increment for continuous connection
+    for (int angleDeg = 0; angleDeg < 360; angleDeg += 1)
     {
-      float radians = radians(angle);
+      float angleRad = radians(angleDeg);
       
       // Create multiple rows of bleachers
-      for (int row = 0; row < bleacherRows; row++)
+      for (int row = 0; row < BLEACHER_ROWS; row++)
       {
         pushMatrix();
         
         // Position each row further back and higher up
-        float rowOffset = row * bleacherDepth * 0.8;
-        float rowHeight = row * bleacherHeight * 0.7;
+        float rowOffset = row * BLEACHER_DEPTH * 0.8;
+        float rowHeight = row * BLEACHER_HEIGHT * 0.7;
         
         // Calculate position for this row
-        float rowX = cos(radians) * (stadiumRadius + rowOffset);
-        float rowZ = sin(radians) * ((stadiumRadius + rowOffset) * (outerTrackHeight / (float)outerTrackWidth));
+        float rowX = cos(angleRad) * (STADIUM_RADIUS + rowOffset);
+        float rowZ = sin(angleRad) * ((STADIUM_RADIUS + rowOffset) * (OUTER_TRACK_HEIGHT / (float)OUTER_TRACK_WIDTH));
         
-        translate(rowX, trackY - rowHeight, rowZ);
+        translate(rowX, offsetY - rowHeight, rowZ);
         
         // Alternate colors for visual interest
         if (row % 2 == 0)
@@ -254,7 +242,7 @@ class Track
         
         noStroke();
         // Make boxes wider to ensure complete connection
-        box(45, bleacherHeight, bleacherDepth);
+        box(45, BLEACHER_HEIGHT, BLEACHER_DEPTH);
         popMatrix();
       }
     }
@@ -265,19 +253,20 @@ class Track
 class Kart
 {
   // Different components of class kart. Details given below.
-  PVector position;            // Position of the kart.
+  PVector position;                  // Position of the kart.
   PVector velocity;            // Current velocity vector.
   float speed;                 // Current speed.
-  float maxSpeed;              // Maximum speed.
-  float acceleration;          // Acceleration of kart.
-  float friction;              // Friction to slow the kart.
-  float rotation;              // Direction the kart is facing. 
-  float turnSpeed;             // How quickly the kart can turn.
+  float rotation = (-PI / 2);              // Direction the kart is facing. 
+  static final float FRICTION = 0.98f;              // Friction to slow the kart.
+  static final float MAX_SPEED = (30 / FRICTION);              // Maximum speed.
+  static final float ACCELERATION = (0.4 / FRICTION);;          // Acceleration of kart.
+  static final float TURN_SPEED = 0.015f;             // How quickly the kart can turn.
 
   // Kart dimensions
-  float kartLength;
-  float kartWidth;
-  float kartHeight;
+  static final float KART_LENGTH = 100f;
+  static final float KART_WIDTH = KART_LENGTH / 4;
+  static final float KART_HEIGHT = KART_LENGTH / 10;
+  static final float SECTION_LENGTH = KART_LENGTH / 5;
   
   // Constructor method.
   Kart(float x, float y, float z)
@@ -285,24 +274,13 @@ class Kart
     position = new PVector(x, y, z);          // Position of kart is input.
     velocity = new PVector(0, 0, 0);          // Velocity of kart begins at rest.
     speed = 0;                                // Speed begins at 0.
-    friction = 0.98;                          // Friction slows kart down when not pressing gas.
-    maxSpeed = (30 / friction);               // Set max speed.
-    acceleration = (0.4 / friction);           // Acceleration of kart set.
-    rotation = (-PI / 2);                     // Kart begins facing 90 degrees.
-    turnSpeed = 0.015;                        // Turn speed of kart.
-
-    
-    // Set dimensions 
-    kartHeight = 10;
-    kartWidth = 25;
-    kartLength = 70;
   }   
   
   // Updates values for the kart.
   void update()
   {
-    // Apply friction to speed
-    speed *= friction;
+    // Apply FRICTION to speed
+    speed *= FRICTION;
     
     // Calculate where the kart wants to go based on its current direction
     PVector intendedDirection = new PVector(sin(rotation), 0, cos(rotation));
@@ -326,46 +304,46 @@ class Kart
   // Acceleration applies until current speed equals the maximum speed.
   void accelerate()
   {
-    speed += acceleration;
-    if (speed > (maxSpeed / 2))
+    speed += ACCELERATION;
+    if (speed > (MAX_SPEED / 2))
     {
-       speed += 0.35*acceleration;
+       speed += 0.35*ACCELERATION;
     }
     
-    if (speed > maxSpeed)
+    if (speed > MAX_SPEED)
     {
-      speed = maxSpeed;
+      speed = MAX_SPEED;
     }
   }
   
   // Decreases the speed at the rate of accleration but only until quarter of max speed.
   void brake()
   {
-    speed -= acceleration;
-    if (speed < -maxSpeed/4)
+    speed -= ACCELERATION;
+    if (speed < -MAX_SPEED/4)
     {
-      speed = -maxSpeed/4;
+      speed = -MAX_SPEED/4;
     }
   }
   
-  // Increases the angle of rotation, turning the kart counter-clockwise (left).
+  // Increases the ANGLE of rotation, turning the kart counter-clockwise (left).
   void turnLeft()
   {
-    rotation += turnSpeed;
+    rotation += TURN_SPEED;
     if (keySpace == true)
     {
-      rotation += turnSpeed/1.5;
+      rotation += TURN_SPEED/1.5;
       speed *= 0.99;
     }
   }
 
-  // Decreases the angle of rotation, turning the kart clockwise (right).
+  // Decreases the ANGLE of rotation, turning the kart clockwise (right).
   void turnRight()
   {
-    rotation -= turnSpeed;
+    rotation -= TURN_SPEED;
     if (keySpace == true)
     {
-      rotation -= turnSpeed/1.5;
+      rotation -= TURN_SPEED/1.5;
       speed *= 0.99;
     }
   }
@@ -377,54 +355,50 @@ class Kart
     translate(position.x, position.y, position.z);
     rotateY(rotation);
     
-    // Make the car bigger overall
-    float carLength = kartLength + 30;
-    float sectionLength = carLength / 5;
-    
     // Very narrow nose section
     fill(255, 0, 0);
     noStroke();
     strokeWeight(1);
     pushMatrix();
-    translate(0, 2, carLength/2 - sectionLength/2);
-    box(kartWidth - 8, kartHeight - 2, sectionLength);
+    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH/2);
+    box(KART_WIDTH - 8, KART_HEIGHT - 2, SECTION_LENGTH);
     popMatrix();
     
     // Section 2 (slightly wider)
     pushMatrix();
-    translate(0, 2, carLength/2 - sectionLength * 1.5);
-    box(kartWidth - 4, kartHeight - 2, sectionLength);
+    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 1.5);
+    box(KART_WIDTH - 4, KART_HEIGHT - 2, SECTION_LENGTH);
     popMatrix();
     
     // Section 3 (medium width)
     pushMatrix();
-    translate(0, 2, carLength/2 - sectionLength * 2.5);
-    box(kartWidth, kartHeight - 2, sectionLength);
+    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 2.5);
+    box(KART_WIDTH, KART_HEIGHT - 2, SECTION_LENGTH);
     popMatrix();
     
     // Section 4 (getting wider)
     pushMatrix();
-    translate(0, 2, carLength/2 - sectionLength * 3.5);
-    box(kartWidth + 4, kartHeight - 2, sectionLength);
+    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 3.5);
+    box(KART_WIDTH + 4, KART_HEIGHT - 2, SECTION_LENGTH);
     popMatrix();
     
     // Section 5 (widest rear)
     pushMatrix();
-    translate(0, 2, carLength/2 - sectionLength * 4.5);
-    box(kartWidth + 8, kartHeight - 2, sectionLength);
+    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 4.5);
+    box(KART_WIDTH + 8, KART_HEIGHT - 2, SECTION_LENGTH);
     popMatrix();
   
     // Simple front wing
     fill(100, 100, 100);
     pushMatrix();
-    translate(0, 8, carLength/2 + 5);
-    box(kartWidth + 5, 2, 4);
+    translate(0, 8, KART_LENGTH/2 + 5);
+    box(KART_WIDTH + 5, 2, 4);
     popMatrix();
   
     // Simple rear wing
     pushMatrix();
-    translate(0, -6, -carLength/2 - 5);
-    box(kartWidth + 10, 3, 5);
+    translate(0, -6, -KART_LENGTH/2 - 5);
+    box(KART_WIDTH + 10, 3, 5);
     popMatrix();
   
     // Tires - positioned for the bigger car
@@ -432,23 +406,23 @@ class Kart
   
     // Front tires
     pushMatrix();
-    translate(-kartWidth/2 - 2, kartHeight/2 + 2, carLength/3);
+    translate(-KART_WIDTH/2 - 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
     box(12, 15, 18);
     popMatrix();
   
     pushMatrix();
-    translate(kartWidth/2 + 2, kartHeight/2 + 2, carLength/3);
+    translate(KART_WIDTH/2 + 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
     box(12, 15, 18);
     popMatrix();
   
     // Rear tires (wider spacing)
     pushMatrix();
-    translate(-kartWidth/2 - 6, kartHeight/2 + 2, -carLength/3);
+    translate(-KART_WIDTH/2 - 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
     box(15, 15, 22);
     popMatrix();
   
     pushMatrix();
-    translate(kartWidth/2 + 6, kartHeight/2 + 2, -carLength/3);
+    translate(KART_WIDTH/2 + 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
     box(15, 15, 22);
     popMatrix();
     
@@ -459,23 +433,23 @@ class Kart
       
       // Front tires
       pushMatrix();
-      translate(-kartWidth/2 - 2, kartHeight/2 + 2, carLength/3);
+      translate(-KART_WIDTH/2 - 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
       box(13, 2, 19);
       popMatrix();
     
       pushMatrix();
-      translate(kartWidth/2 + 2, kartHeight/2 + 2, carLength/3);
+      translate(KART_WIDTH/2 + 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
       box(13, 2, 19);
       popMatrix();
     
       // Rear tires (wider spacing)
       pushMatrix();
-      translate(-kartWidth/2 - 6, kartHeight/2 + 2, -carLength/3);
+      translate(-KART_WIDTH/2 - 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
       box(16, 2, 23);
       popMatrix();
     
       pushMatrix();
-      translate(kartWidth/2 + 6, kartHeight/2 + 2, -carLength/3);
+      translate(KART_WIDTH/2 + 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
       box(16, 2, 23);
       popMatrix();
     }
@@ -537,7 +511,7 @@ class Timer
   {
     // X and Z range of values that determine the finish line.
     boolean finishLineX = (kart.position.x >= -75 && kart.position.x <= -25);
-    boolean finishLineZ = (kart.position.z <= 3*(gameTrack.outerTrackHeight - gameTrack.innerTrackHeight)/2 && kart.position.z >= (gameTrack.outerTrackHeight - gameTrack.innerTrackHeight));
+    boolean finishLineZ = (kart.position.z <= 3*(Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT)/2 && kart.position.z >= (Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT));
      
     // Checks if user has crossed the finish line.
     if (finishLineX && finishLineZ && !crossedFinishLine)
@@ -550,7 +524,7 @@ class Timer
     if (crossedFinishLine && !farFromFinishLine)
     {
       // The distance is the opposite side of the track from the finish line.
-      if (kart.position.x >= -75 && kart.position.x <= -25 && kart.position.z >= -(gameTrack.outerTrackHeight / 2) && kart.position.z <= -(gameTrack.innerTrackHeight / 2))
+      if (kart.position.x >= -75 && kart.position.x <= -25 && kart.position.z >= -(Track.OUTER_TRACK_HEIGHT / 2) && kart.position.z <= -(Track.INNER_TRACK_HEIGHT / 2))
       {
         farFromFinishLine = true;
       }
@@ -622,8 +596,8 @@ class Timer
       float ongoingTime = (millis() - lapStartTime) / 1000.0;
       
       // Speedometer
-      float MPS_TO_KMH = 3.6;
-      text("Speed: " + nf((playerKart.speed * MPS_TO_KMH), 1, 2) + " KM/H", 20, 30);
+      final float CONVERT_TO_KMH = 5.4;
+      text("Speed: " + nf((playerKart.speed * CONVERT_TO_KMH), 1, 2) + " KM/H", 20, 30);
      
       // Display current lap time  
       text("Current Lap: " + nf(ongoingTime, 1, 2) + "s", 20, 50); 
@@ -691,7 +665,7 @@ void keyPressed()
   }
 }
 
-// If the specific key is released, turns the bool false to prevent acceleration in that direction.
+// If the specific key is released, turns the bool false to prevent ACCELERATION in that direction.
 void keyReleased()
 {
   if (key == 'w' || key == 'W' || keyCode == UP)
@@ -744,7 +718,7 @@ void playerInput()
     playerKart.accelerate();
   }
   
-  // If "s" or down arrow, reverse acceleration of kart and move backwards.
+  // If "s" or down arrow, reverse ACCELERATION of kart and move backwards.
   if (keyDown == true && gameTimer.gameStarted)
   {
     playerKart.brake();
@@ -771,7 +745,7 @@ Kart playerKart;
 void resetGame()
 {
   // Sets position of the kart to starting position.
-  playerKart.position = new PVector(0, 0, ((gameTrack.outerTrackHeight / 2) - ((gameTrack.outerTrackHeight - gameTrack.innerTrackHeight) / 4)));
+  playerKart.position = new PVector(0, 0, ((Track.OUTER_TRACK_HEIGHT / 2) - ((Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT) / 4)));
   
   // Sets speed of the kart to 0.
   playerKart.velocity = new PVector(0, 0, 0);
@@ -786,7 +760,7 @@ void setup()
   // Sets up game size, classes, and timers.
   fullScreen(P3D, 1);
   gameTrack = new Track(0, 0, 0);
-  playerKart = new Kart(0, 0, ((gameTrack.outerTrackHeight / 2) - ((gameTrack.outerTrackHeight - gameTrack.innerTrackHeight) / 4)));
+  playerKart = new Kart(0, 0, ((Track.OUTER_TRACK_HEIGHT / 2) - ((Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT) / 4)));
   gameTimer = new Timer();
   gameTimer.initializeTimers();
 }
