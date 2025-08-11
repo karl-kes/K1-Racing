@@ -1,4 +1,7 @@
-// Class for the track.
+/*
+  * K1 Racing
+*/
+
 class Track {  
   // Dimensions
   static final float OUTER_TRACK_WIDTH = 6000f;
@@ -16,8 +19,8 @@ class Track {
   static final float BLEACHER_HEIGHT = 35f;
   static final float BLEACHER_DEPTH = 65f;
   static final float BLEACHER_THICKNESS = 55f;
-  static final float BLEACHER_DEPTH_FACTOR = 0.8f;
-  static final float BLEACHER_HEIGHT_FACTOR = 0.7f;
+  static final float BLEACHER_DEPTH_OFFSET_FACTOR = 0.8f;
+  static final float BLEACHER_HEIGHT_OFFSET_FACTOR = 0.7f;
   
   // Physics
   static final float COLLISION_VEL_MULT = -0.45f;
@@ -38,14 +41,14 @@ class Track {
   // Visuals
   static final float TRACK_STROKE_WEIGHT = 6;
   static final float MARKING_STROKE_WEIGHT = 2;
-  final int TRACK_COLOUR = color(87, 87, 86);
-  final int BOUNDARY_COLOUR = color(255, 255, 255);
-  final int BOUNDARY_COLOUR_RED = color(255, 0, 0);
-  final int LANE_MARKING_COLOUR = color(25, 25, 25);
-  final int GROUND_COLOUR = color(153, 237, 195);
-  final int TIRE_COLOUR = color(40, 40, 40);
-  final int BLEACHER_COLOUR_LIGHT = color(210, 210, 210);
-  final int BLEACHER_COLOUR_DARK = color(170, 170, 170);
+  static final int TRACK_COLOUR = 0xFF575756;
+  static final int BOUNDARY_COLOUR = 0xFFFFFFFF;
+  static final int BOUNDARY_COLOUR_RED = 0xFFFF0000;
+  static final int LANE_MARKING_COLOUR = 0xFF191919;
+  static final int GROUND_COLOUR = 0xFF99EDC3;
+  static final int TIRE_COLOUR = 0xFF282828;
+  static final int BLEACHER_COLOUR_LIGHT = 0xFFD2D2D2;
+  static final int BLEACHER_COLOUR_DARK = 0xFFAAAAAA;
   
   Track(float x, float y, float z) {
     position = new PVector(x, y, z);
@@ -110,6 +113,7 @@ class Track {
           rect(0, (-SQUARE_SIZE)*i, SQUARE_SIZE, SQUARE_SIZE);
         }
       }
+      
       lights();
       popMatrix();
     }
@@ -173,8 +177,8 @@ class Track {
         pushMatrix();
         
         // Position each row further back and higher up
-        float rowOffset = row * BLEACHER_DEPTH * BLEACHER_DEPTH_FACTOR;
-        float rowHeight = row * BLEACHER_HEIGHT * BLEACHER_HEIGHT_FACTOR;
+        float rowOffset = row * BLEACHER_DEPTH * BLEACHER_DEPTH_OFFSET_FACTOR;
+        float rowHeight = row * BLEACHER_HEIGHT * BLEACHER_HEIGHT_OFFSET_FACTOR;
         
         // Calculate position for this row
         float rowX = cos(angleRad) * (STADIUM_RADIUS + rowOffset);
@@ -229,37 +233,65 @@ class Track {
   }
 }
 
-// Class of the kart with all of the variables.
-class Kart
-{
-  // Different components of class kart. Details given below.
-  PVector position;                  // Position of the kart.
-  PVector velocity;            // Current velocity vector.
-  float speed;                 // Current speed.
-  float rotation = (-PI / 2);              // Direction the kart is facing. 
-  static final float FRICTION = 0.98f;              // Friction to slow the kart.
-  static final float MAX_SPEED = (30 / FRICTION);              // Maximum speed.
-  static final float ACCELERATION = (0.4 / FRICTION);;          // Acceleration of kart.
-  static final float TURN_SPEED = 0.015f;             // How quickly the kart can turn.
-
-  // Kart dimensions
+class Kart {
+  // Dimensions
   static final float KART_LENGTH = 100f;
   static final float KART_WIDTH = KART_LENGTH / 4;
   static final float KART_HEIGHT = KART_LENGTH / 10;
   static final float SECTION_LENGTH = KART_LENGTH / 5;
+  static final float WING_HEIGHT = 2f;
+  static final float WING_LENGTH = 4f;
+  static final float TIRE_WIDTH = 15f;
+  static final float TIRE_HEIGHT = 15f;
+  static final float TIRE_LENGTH = 22f;
+  static final float COCKPIT_WIDTH = 10f;
+  static final float COCKPIT_HEIGHT = 6f;
+  static final float COCKPIT_LENGTH = 30f;
   
-  // Constructor method.
-  Kart(float x, float y, float z)
-  { 
-    position = new PVector(x, y, z);          // Position of kart is input.
-    velocity = new PVector(0, 0, 0);          // Velocity of kart begins at rest.
-    speed = 0;                                // Speed begins at 0.
+  // Physics
+  PVector velocity;
+  float speed;
+  static final float FRICTION = 0.98f;
+  static final float MAX_SPEED = (30 / FRICTION);
+  static final float ACCELERATION = (0.4 / FRICTION);
+  static final float BOOST_FACTOR = 0.35f;
+  static final float TURN_SPEED = 0.015f;
+  static final float VEL_LERP_FACTOR = 0.015f;
+  static final float DRIFT_SPEED_FACTOR = 0.99f;
+  static final float DRIFT_TURN_FACTOR = 1.5f;
+  
+  // Positions
+  PVector position;
+  float rotation = -PI/2;
+  static final float KART_BODY_X = 0f;
+  static final float KART_BODY_Z = 2f;
+  static final float WING_X = 0f;
+  static final float WING_Z_OFFSET = 5f;
+  static final float TIRE_Y = KART_HEIGHT/2 + 2;
+  static final float TIRE_Z = KART_LENGTH/3;
+  static final float COCKPIT_X = 0f;
+  static final float COCKPIT_Y = -2f;
+  static final float COCKPIT_Z = 5f;
+  
+  // Visuals
+  static final int KART_BODY_COLOUR = 0xFFFF0000;
+  static final int KART_WING_COLOUR = 0xFF646464;
+  static final int TIRE_COLOUR = 0xFF000000;
+  static final int BURNING_TIRE_COLOUR_1 = 0xFF802010;
+  static final int BURNING_TIRE_COLOUR_2 = 0xFFA03010;
+  static final int BURNING_TIRE_COLOUR_3 = 0xFFFF4500;
+  static final int COCKPIT_COLOUR = 0xFF0064C8;
+  float driftStartTime = 0;
+  boolean wasDrifting = false;
+  
+  Kart(float x, float y, float z) { 
+    position = new PVector(x, y, z);
+    velocity = new PVector(0, 0, 0);
+    speed = 0;
   }   
   
   // Updates values for the kart.
-  void update()
-  {
-    // Apply FRICTION to speed
+  void update() {
     speed *= FRICTION;
     
     // Calculate where the kart wants to go based on its current direction
@@ -267,14 +299,11 @@ class Kart
     PVector intendedVelocity = PVector.mult(intendedDirection, speed);
     
     // If not drifting, snap velocity to intended direction (strong grip)
-    if (!keySpace)
-    {
+    if (!keySpace) {
       velocity = intendedVelocity.copy();
-    }
-    else
-    {
+    } else {
       // If drifting, blend between current velocity and intended velocity
-      velocity.lerp(intendedVelocity, 0.015); // 0.1 = drift amount (lower = more drift)
+      velocity.lerp(intendedVelocity, VEL_LERP_FACTOR); // (lower = more drift)
     }
     
     // Update position
@@ -282,165 +311,142 @@ class Kart
   }
   
   // Acceleration applies until current speed equals the maximum speed.
-  void accelerate()
-  {
+  void accelerate() {
     speed += ACCELERATION;
-    if (speed > (MAX_SPEED / 2))
-    {
-       speed += 0.35*ACCELERATION;
+    
+    if (speed > (MAX_SPEED / 2)) {
+       speed += BOOST_FACTOR * ACCELERATION;
     }
     
-    if (speed > MAX_SPEED)
-    {
+    if (speed > MAX_SPEED) {
       speed = MAX_SPEED;
     }
   }
   
   // Decreases the speed at the rate of accleration but only until quarter of max speed.
-  void brake()
-  {
+  void brake() {
     speed -= ACCELERATION;
-    if (speed < -MAX_SPEED/4)
-    {
+    
+    if (speed < -MAX_SPEED/4) {
       speed = -MAX_SPEED/4;
     }
   }
   
   // Increases the ANGLE of rotation, turning the kart counter-clockwise (left).
-  void turnLeft()
-  {
+  void turnLeft() {
     rotation += TURN_SPEED;
-    if (keySpace == true)
-    {
-      rotation += TURN_SPEED/1.5;
-      speed *= 0.99;
+    
+    if (keySpace == true) {
+      rotation += TURN_SPEED/DRIFT_TURN_FACTOR;
+      speed *= DRIFT_SPEED_FACTOR;
     }
   }
 
   // Decreases the ANGLE of rotation, turning the kart clockwise (right).
-  void turnRight()
-  {
+  void turnRight() {
     rotation -= TURN_SPEED;
-    if (keySpace == true)
-    {
-      rotation -= TURN_SPEED/1.5;
-      speed *= 0.99;
+    
+    if (keySpace == true) {
+      rotation -= TURN_SPEED/DRIFT_TURN_FACTOR;
+      speed *= DRIFT_SPEED_FACTOR;
     }
   }
   
-  // Sets the colour, position, shape, and size.
-  void display()
-  {
-    pushMatrix();
+  private void drawKartBody() {
     translate(position.x, position.y, position.z);
     rotateY(rotation);
     
     // Very narrow nose section
-    fill(255, 0, 0);
+    fill(KART_BODY_COLOUR);
     noStroke();
-    strokeWeight(1);
-    pushMatrix();
-    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH/2);
-    box(KART_WIDTH - 8, KART_HEIGHT - 2, SECTION_LENGTH);
-    popMatrix();
     
-    // Section 2 (slightly wider)
-    pushMatrix();
-    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 1.5);
-    box(KART_WIDTH - 4, KART_HEIGHT - 2, SECTION_LENGTH);
-    popMatrix();
+    float sectionLengthOffsetFactor = 0.5f;
+    float kartWidthOffsetFactor = 8f;
     
-    // Section 3 (medium width)
-    pushMatrix();
-    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 2.5);
-    box(KART_WIDTH, KART_HEIGHT - 2, SECTION_LENGTH);
-    popMatrix();
-    
-    // Section 4 (getting wider)
-    pushMatrix();
-    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 3.5);
-    box(KART_WIDTH + 4, KART_HEIGHT - 2, SECTION_LENGTH);
-    popMatrix();
-    
-    // Section 5 (widest rear)
-    pushMatrix();
-    translate(0, 2, KART_LENGTH/2 - SECTION_LENGTH * 4.5);
-    box(KART_WIDTH + 8, KART_HEIGHT - 2, SECTION_LENGTH);
-    popMatrix();
-  
-    // Simple front wing
-    fill(100, 100, 100);
-    pushMatrix();
-    translate(0, 8, KART_LENGTH/2 + 5);
-    box(KART_WIDTH + 5, 2, 4);
-    popMatrix();
-  
-    // Simple rear wing
-    pushMatrix();
-    translate(0, -6, -KART_LENGTH/2 - 5);
-    box(KART_WIDTH + 10, 3, 5);
-    popMatrix();
-  
-    // Tires - positioned for the bigger car
-    fill(0);
-  
-    // Front tires
-    pushMatrix();
-    translate(-KART_WIDTH/2 - 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
-    box(12, 15, 18);
-    popMatrix();
-  
-    pushMatrix();
-    translate(KART_WIDTH/2 + 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
-    box(12, 15, 18);
-    popMatrix();
-  
-    // Rear tires (wider spacing)
-    pushMatrix();
-    translate(-KART_WIDTH/2 - 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
-    box(15, 15, 22);
-    popMatrix();
-  
-    pushMatrix();
-    translate(KART_WIDTH/2 + 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
-    box(15, 15, 22);
-    popMatrix();
-    
-    // While car is drifting
-    if (keySpace == true && speed > 15)
-    {
-      fill(255, 92, 0);
-      
-      // Front tires
+    for (int kartSection = 1; kartSection < 6; kartSection++) {
       pushMatrix();
-      translate(-KART_WIDTH/2 - 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
-      box(13, 2, 19);
-      popMatrix();
-    
-      pushMatrix();
-      translate(KART_WIDTH/2 + 2, KART_HEIGHT/2 + 2, KART_LENGTH/3);
-      box(13, 2, 19);
-      popMatrix();
-    
-      // Rear tires (wider spacing)
-      pushMatrix();
-      translate(-KART_WIDTH/2 - 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
-      box(16, 2, 23);
-      popMatrix();
-    
-      pushMatrix();
-      translate(KART_WIDTH/2 + 6, KART_HEIGHT/2 + 2, -KART_LENGTH/3);
-      box(16, 2, 23);
+      translate(KART_BODY_X, KART_BODY_Z, KART_LENGTH/2 - SECTION_LENGTH * sectionLengthOffsetFactor);
+      box(KART_WIDTH - kartWidthOffsetFactor, KART_HEIGHT, SECTION_LENGTH);
+      kartWidthOffsetFactor -= 4;
+      sectionLengthOffsetFactor += 1;
       popMatrix();
     }
+  }
   
-    // Driver helmet area
-    fill(0, 100, 200);
-    pushMatrix();
-    translate(0, -2, 5);
-    box(10, 6, 30);
-    popMatrix();
+  private void drawWings() {
+    float wingOffsetY = 8f;
+    float wingWidthOffset = 10f;
+    fill(KART_WING_COLOUR);
     
+    for (int i = 1; i > -2; i -= 2) {
+      pushMatrix();
+      translate(WING_X, wingOffsetY, i * (KART_LENGTH/2 + WING_Z_OFFSET));
+      box(KART_WIDTH + wingWidthOffset, WING_HEIGHT, WING_LENGTH);
+      popMatrix();
+      wingWidthOffset *= 2;
+      wingOffsetY = -6f;
+    }
+  }
+  
+  private void drawTires() {
+    float tireOffset = 2f;
+    float xFrontOrRearFactor = 1f;
+    float zFrontOrRearFactor = 1f;
+    
+    if (keySpace == true) {
+      if (wasDrifting == false) {
+        driftStartTime = millis();
+        wasDrifting = true;
+      }
+      
+      float driftDuration = (millis() - driftStartTime) / 1000.0;
+      
+      if (driftDuration > 2.8) {
+        fill(BURNING_TIRE_COLOUR_3);
+      } else if (driftDuration > 1.8) {
+        fill(BURNING_TIRE_COLOUR_2);
+      } else if (driftDuration > 0.8) {
+        fill(BURNING_TIRE_COLOUR_1);
+      } else {
+        fill(TIRE_COLOUR);
+      }
+    } else {
+      fill(TIRE_COLOUR);
+      wasDrifting = false;
+    }
+    
+    for (int i = 1; i < 5; i++) {
+      if (i % 2 == 0) {
+        xFrontOrRearFactor *= -1;
+      }
+      
+      if (i > 2 && i % 2 == 1) {
+        zFrontOrRearFactor  *= -1;
+        tireOffset = 6f;
+      }
+      
+      pushMatrix();
+      translate(xFrontOrRearFactor * (KART_WIDTH/2 + tireOffset), TIRE_Y, zFrontOrRearFactor * TIRE_Z);
+      box(TIRE_WIDTH, TIRE_HEIGHT, TIRE_LENGTH);
+      popMatrix();
+    }
+  }
+  
+  private void drawCockPit() {
+    fill(COCKPIT_COLOUR);
+    pushMatrix();
+    translate(COCKPIT_X, COCKPIT_Y, COCKPIT_Z);
+    box(COCKPIT_WIDTH, COCKPIT_HEIGHT, COCKPIT_LENGTH);
+    popMatrix();
+  }
+  
+  // Sets the colour, position, shape, and size.
+  void display() {
+    pushMatrix();
+    drawKartBody();
+    drawWings();
+    drawTires();
+    drawCockPit();
     popMatrix();
   }
 }
