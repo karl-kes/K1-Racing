@@ -2,180 +2,97 @@
   * K1 Racing
 */
 
-// Variables to handle the inputs.
-boolean keyUp;
-boolean keyDown;
-boolean keyRight;
-boolean keyLeft;
-boolean keySpace;
-  
-// If the specific key is pressed, turns the bool true to move the kart in that direction.
-void keyPressed()
-{
-  if (key == 'w' || key == 'W' || keyCode == UP)
-  {
-    keyUp = true;
-  } 
-  
-  if (key == 's' || key == 'S' || keyCode == DOWN)
-  {
-    keyDown = true;
-  }
-  
-  if (key == 'a' || key == 'A' || keyCode == LEFT)
-  {
-    keyLeft = true;
-  }
-  
-  if (key == 'd' || key == 'D' || keyCode == RIGHT)
-  {
-    keyRight = true;
-  }
-  
-  if (key == ' ')
-  {
-    keySpace = true;
-  }
+// Kart
+static final float KART_STARTING_POSITION_X = 0f;
+static final float KART_STARTING_POSITION_Y = 0f;
+static final float KART_STARTING_POSITION_Z = (Track.OUTER_TRACK_HEIGHT + Track.INNER_TRACK_HEIGHT) / 4;
+static final float KART_STARTING_DIRECTION = -PI/2;
+
+// Camera
+static final int BACKGROUND_COLOUR = 0xFFC3EEFA;
+static final float CAMERA_HEIGHT_RATIO = 0.0868f;
+static final float CAMERA_DISTANCE_RATIO = 0.117f;
+float CAMERA_HEIGHT;
+float CAMERA_DISTANCE;
+
+void setupCamera() {
+  camera((playerKart.position.x - (CAMERA_DISTANCE * sin(playerKart.rotation))),   // x position of camera.
+         (playerKart.position.y - CAMERA_HEIGHT),                                  // y position of camera.
+         (playerKart.position.z - (CAMERA_DISTANCE * cos(playerKart.rotation))),   // z position of camera.
+         (playerKart.position.x),                                                  // x position camera looks at.
+         (playerKart.position.y),                                                  // y position camera looks at.
+         (playerKart.position.z),                                                  // z position camera looks at.
+         0, 1, 0);
 }
 
-// If the specific key is released, turns the bool false to prevent ACCELERATION in that direction.
-void keyReleased()
-{
-  if (key == 'w' || key == 'W' || keyCode == UP)
-  {
-    keyUp = false;
-  } 
+// Input handling
+boolean keyUp, keyDown, keyRight, keyLeft, keySpace;
+
+void updateKey(boolean pressed) {
+  if (key == 'w' || key == 'W' || keyCode == UP) keyUp = pressed;
+  if (key == 's' || key == 'S' || keyCode == DOWN) keyDown = pressed;
+  if (key == 'a' || key == 'A' || keyCode == LEFT) keyLeft = pressed;
+  if (key == 'd' || key == 'D' || keyCode == RIGHT) keyRight = pressed;
+  if (key == ' ') keySpace = pressed;
+}
+
+void keyPressed() {
+  updateKey(true);
+}
+
+void keyReleased() {
+  updateKey(false);
   
-  if (key == 's' || key == 'S' || keyCode == DOWN)
-  {
-    keyDown = false;
-  }
-  
-  if (key == 'a' || key == 'A' || keyCode == LEFT)
-  {
-    keyLeft = false;
-  }
-  
-  if (key == 'd' || key == 'D' || keyCode == RIGHT)
-  {
-    keyRight = false;
-  }
-  
-  if (key == ' ')
-  {
-    keySpace = false;
-  }
-  
-  // If space is pressed, start the game.
-  if (key == ' ' && !gameTimer.gameStarted)
-  {
+  if (key == ' ' && !gameTimer.gameStarted) {
     gameTimer.gameStarted = true;
     gameTimer.startGame();
   }
   
-  // Restarts the game; moves kart to original position and resets timers.
-  if (key == 'r' || key == 'R')
-  {
+  if (key == 'r' || key == 'R') {
     resetGame();
     gameTimer.initializeTimers();
   }
 }
 
-// Handles the user input for the kart.
-void playerInput()
-{
-  // If "w" or up arrow, accelerate kart forward.
-  if (keyUp == true && gameTimer.gameStarted)
-  {
-    playerKart.accelerate();
-  }
+void playerInput() {
+  if (!gameTimer.gameStarted) return;
   
-  // If "s" or down arrow, reverse ACCELERATION of kart and move backwards.
-  if (keyDown == true && gameTimer.gameStarted)
-  {
-    playerKart.brake();
-  }
-  
-  // If "a" or left arrow, rotate the kart to the left.
-  if (keyLeft == true && gameTimer.gameStarted)
-  {
-    playerKart.turnLeft();
-  }
-  
-  // If "d" or right arrow, rotate the kart to the right.
-  if (keyRight == true && gameTimer.gameStarted)
-  {
-    playerKart.turnRight();
-  }
+  if (keyUp) playerKart.accelerate();
+  if (keyDown) playerKart.brake();
+  if (keyLeft) playerKart.turnLeft();
+  if (keyRight) playerKart.turnRight();
 }
 
 Track gameTrack;
 Timer gameTimer;
 Kart playerKart;
 
-// Resets the game: kart position, speed, etc.
-void resetGame()
-{
-  // Sets position of the kart to starting position.
-  playerKart.position = new PVector(0, 0, ((Track.OUTER_TRACK_HEIGHT / 2) - ((Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT) / 4)));
-  
-  // Sets speed of the kart to 0.
+void resetGame() {
+  playerKart.position = new PVector(KART_STARTING_POSITION_X, KART_STARTING_POSITION_Y, KART_STARTING_POSITION_Z);
   playerKart.velocity = new PVector(0, 0, 0);
   playerKart.speed = 0;
-  
-  // Sets rotation in proper direction.
-  playerKart.rotation = (-PI/2);
+  playerKart.rotation = KART_STARTING_DIRECTION;
 }
 
-void setup()
-{
-  // Sets up game size, classes, and timers.
+void setup() {
   fullScreen(P3D, 1);
   gameTrack = new Track(0, 0, 0);
-  playerKart = new Kart(0, 0, ((Track.OUTER_TRACK_HEIGHT / 2) - ((Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT) / 4)));
+  playerKart = new Kart(KART_STARTING_POSITION_X, KART_STARTING_POSITION_Y, KART_STARTING_POSITION_Z);
   gameTimer = new Timer();
   gameTimer.initializeTimers();
+  CAMERA_HEIGHT = height * CAMERA_HEIGHT_RATIO;
+  CAMERA_DISTANCE = width * CAMERA_DISTANCE_RATIO;
 }
 
-void draw()
-{
-  // Allows control of the camera distance/height from the kart.
-  float cameraHeight = height * 0.0868;
-  float cameraDistance = width * 0.117;
-  
-  // Sets the background colour.
-  background(#C3EEFA);
-  
-  // Sets up lighting for the frame.
+void draw() { 
+  background(BACKGROUND_COLOUR);
   lights();
-  
-  // Draws the track.
   gameTrack.displayTrack();
-  
-  // Sets up the camera; acts like a circle with radius "cameraDistance" and a height "cameraHeight" centered on the karts positions.
-  camera((playerKart.position.x - (cameraDistance * sin(playerKart.rotation))),   // x position of camera.
-         (playerKart.position.y - cameraHeight),                                  // y position of camera.
-         (playerKart.position.z - (cameraDistance * cos(playerKart.rotation))),   // z position of camera.
-         (playerKart.position.x),                                                 // x position camera looks at.
-         (playerKart.position.y),                                                 // y position camera looks at.
-         (playerKart.position.z),                                                 // z position camera looks at.
-         0, 1, 0);
-  
-  // Handles the user input for the kart.
+  setupCamera();
   playerInput();
-  
-  // Displays the kart.
   playerKart.display();
-  
-  // Updates the kart using the user inputs.
   playerKart.update();
-  
-  // Checks to see if the kart is going off the track.
   gameTrack.checkWallCollision(playerKart);
-  
-  // Checks to see if user has crossed the finish line.
   gameTimer.checkFinishLine(playerKart);
-  
-  // Displays the current, last, and best lap times.
   gameTimer.displayTimers();
 }
