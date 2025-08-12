@@ -4,21 +4,21 @@
 
 class Track {  
   // Dimensions
-  static final float OUTER_TRACK_WIDTH = 6000f;
-  static final float OUTER_TRACK_HEIGHT = 3000f;
+  static final float OUTER_TRACK_WIDTH = 7500f;
+  static final float OUTER_TRACK_HEIGHT = OUTER_TRACK_WIDTH/2;
   static final float INNER_TRACK_WIDTH = OUTER_TRACK_WIDTH - 1000f;
   static final float INNER_TRACK_HEIGHT = OUTER_TRACK_HEIGHT - 1000f;
   static final float SIZE_OF_GROUND = 4*OUTER_TRACK_WIDTH/3;
   static final int SQUARE_SIZE = 50;
   static final float NUMBER_OF_SQUARES = ((OUTER_TRACK_HEIGHT - INNER_TRACK_HEIGHT) / (2*SQUARE_SIZE));
   static final float BARRIER_HEIGHT = 35f;
-  static final float BARRIER_THICKNESS = 30f;
-  static final float TIRE_LENGTH = 25f;
-  static final float TIRE_HEIGHT = 13f;
-  static final float BLEACHER_ROWS = 8f;
+  static final float BARRIER_THICKNESS = 6*BARRIER_HEIGHT/7;
+  static final float TIRE_BOUNDARY_LENGTH = 5*BARRIER_HEIGHT/7;
+  static final float TIRE_BOUNDARY_HEIGHT = 3*BARRIER_HEIGHT/7;
   static final float BLEACHER_HEIGHT = 35f;
-  static final float BLEACHER_DEPTH = 65f;
-  static final float BLEACHER_THICKNESS = 55f;
+  static final float BLEACHER_ROWS = 2*BLEACHER_HEIGHT/7;
+  static final float BLEACHER_DEPTH = 13*BLEACHER_HEIGHT/7;
+  static final float BLEACHER_THICKNESS = 11*BLEACHER_HEIGHT/7;
   static final float BLEACHER_DEPTH_OFFSET_FACTOR = 0.8f;
   static final float BLEACHER_HEIGHT_OFFSET_FACTOR = 0.7f;
   
@@ -157,10 +157,10 @@ class Track {
       // Simple stacked tire boxes
       for (int i = 0; i < 2; i++) {
         pushMatrix();
-        translate(x, TRACK_Y + (i * 15) - 10, z);
+        translate(x, TRACK_Y + (i * 15) - 15, z);
         fill(TIRE_COLOUR);
         noStroke();
-        box(TIRE_LENGTH, TIRE_HEIGHT, TIRE_LENGTH);
+        box(TIRE_BOUNDARY_LENGTH, TIRE_BOUNDARY_HEIGHT, TIRE_BOUNDARY_LENGTH);
         popMatrix();
       }
     }
@@ -239,14 +239,14 @@ class Kart {
   static final float KART_WIDTH = KART_LENGTH / 4;
   static final float KART_HEIGHT = KART_LENGTH / 10;
   static final float SECTION_LENGTH = KART_LENGTH / 5;
-  static final float WING_HEIGHT = 2f;
-  static final float WING_LENGTH = 4f;
-  static final float TIRE_WIDTH = 15f;
-  static final float TIRE_HEIGHT = 15f;
-  static final float TIRE_LENGTH = 22f;
-  static final float COCKPIT_WIDTH = 10f;
-  static final float COCKPIT_HEIGHT = 6f;
-  static final float COCKPIT_LENGTH = 30f;
+  static final float WING_HEIGHT = KART_LENGTH/50;
+  static final float WING_LENGTH = KART_LENGTH/25;
+  static final float TIRE_WIDTH = 3*KART_LENGTH/20;
+  static final float TIRE_HEIGHT = 3*KART_LENGTH/20;
+  static final float TIRE_LENGTH = 11*KART_LENGTH/50;
+  static final float COCKPIT_WIDTH = KART_LENGTH/10;
+  static final float COCKPIT_HEIGHT = 3*KART_LENGTH/50;
+  static final float COCKPIT_LENGTH = 3*KART_LENGTH/10;
   
   // Physics
   PVector velocity;
@@ -259,6 +259,8 @@ class Kart {
   static final float VEL_LERP_FACTOR = 0.015f;
   static final float DRIFT_SPEED_FACTOR = 0.99f;
   static final float DRIFT_TURN_FACTOR = 1.5f;
+  private PVector intendedDirection = new PVector();
+  private PVector intendedVelocity = new PVector();
   
   // Positions
   PVector position;
@@ -295,12 +297,12 @@ class Kart {
     speed *= FRICTION;
     
     // Calculate where the kart wants to go based on its current direction
-    PVector intendedDirection = new PVector(sin(rotation), 0, cos(rotation));
-    PVector intendedVelocity = PVector.mult(intendedDirection, speed);
+    intendedDirection.set(sin(rotation), 0, cos(rotation));
+    intendedVelocity.set(intendedDirection).mult(speed);
     
     // If not drifting, snap velocity to intended direction (strong grip)
     if (!keySpace) {
-      velocity = intendedVelocity.copy();
+      velocity.set(intendedVelocity);
     } else {
       // If drifting, blend between current velocity and intended velocity
       velocity.lerp(intendedVelocity, VEL_LERP_FACTOR); // (lower = more drift)
@@ -356,7 +358,6 @@ class Kart {
     translate(position.x, position.y, position.z);
     rotateY(rotation);
     
-    // Very narrow nose section
     fill(KART_BODY_COLOUR);
     noStroke();
     
@@ -401,11 +402,11 @@ class Kart {
       
       float driftDuration = (millis() - driftStartTime) / 1000.0;
       
-      if (driftDuration > 2.8) {
+      if (driftDuration > 2.5) {
         fill(BURNING_TIRE_COLOUR_3);
-      } else if (driftDuration > 1.8) {
+      } else if (driftDuration > 1.5) {
         fill(BURNING_TIRE_COLOUR_2);
-      } else if (driftDuration > 0.8) {
+      } else if (driftDuration > 0.5) {
         fill(BURNING_TIRE_COLOUR_1);
       } else {
         fill(TIRE_COLOUR);
@@ -440,32 +441,38 @@ class Kart {
     popMatrix();
   }
   
-  // Sets the colour, position, shape, and size.
   void display() {
-    pushMatrix();
     drawKartBody();
     drawWings();
     drawTires();
     drawCockPit();
-    popMatrix();
   }
 }
 
-// Class for the timers.
-class Timer
-{
+class Timer {
+  // Logic
+  static final float finishLineRange = 25f;
   boolean gameStarted;
   boolean crossedFinishLine;
   boolean farFromFinishLine;
+  int lapCount;
+  
+  // Timers
   float lapStartTime;
   float currentLapTime;
   float bestLapTime;
   float lastLapTime;
-  int lapCount;
   
-  // Constructor method.
-  Timer()
-  {
+  // Visuals
+  static final int TEXT_COLOUR_WHITE = 0xFFFFFFFF;
+  static final int TEXT_COLOUR_BLACK = 0xFF000000;
+  static final int TEXT_SIZE_LARGE = 40;
+  static final int TEXT_SIZE_SMALL = 20;
+  static final int TEXT_MARGIN = 20;
+  static final int TEXT_LINE_HEIGHT = 30;
+  static final float CONVERT_TO_KMH = 5.4f;
+  
+  Timer() {
     gameStarted = false;
     crossedFinishLine = false;
     farFromFinishLine = false;
@@ -476,60 +483,55 @@ class Timer
     lapCount = 0;
   }
   
-  // Initializes timers.
-  void initializeTimers()
-  {
+  void initializeTimers() {
     crossedFinishLine = false;
     farFromFinishLine = false;
+    gameStarted = false;
     currentLapTime = 0;
     bestLapTime = Float.MAX_VALUE;
     lastLapTime = 0;
     lapCount = 0;
   }
   
-  void startGame()
-  {
+  void startGame() {
     lapStartTime = millis();
+    gameStarted = true;
   }
   
-  // Checks to see if kart has past finish line.
-  void checkFinishLine(Kart kart)
-  {
-    // X and Z range of values that determine the finish line.
-    boolean finishLineX = (kart.position.x >= -75 && kart.position.x <= -25);
-    boolean finishLineZ = (kart.position.z <= 3*(Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT)/2 && kart.position.z >= (Track.OUTER_TRACK_HEIGHT - Track.INNER_TRACK_HEIGHT));
-     
-    // Checks if user has crossed the finish line.
-    if (finishLineX && finishLineZ && !crossedFinishLine)
-    {
+  private boolean isAtFinishLine(Kart kart) {
+    return (kart.position.x >= -Track.SQUARE_SIZE - finishLineRange &&
+            kart.position.x <= -Track.SQUARE_SIZE + finishLineRange &&
+            kart.position.z >= Track.INNER_TRACK_HEIGHT/2 &&
+            kart.position.z <= Track.OUTER_TRACK_HEIGHT/2);
+  }
+  
+  private boolean isAwayFromFinishLine(Kart kart) {
+    return (kart.position.x >= -Track.SQUARE_SIZE - finishLineRange && 
+            kart.position.x <= -Track.SQUARE_SIZE + finishLineRange && 
+            kart.position.z >= -Track.OUTER_TRACK_HEIGHT/2 && 
+            kart.position.z <= -Track.INNER_TRACK_HEIGHT/2);
+  }
+  
+  void checkFinishLine(Kart kart) {
+    boolean finishLine = isAtFinishLine(kart);
+    boolean awayPoint = isAwayFromFinishLine(kart);
+                          
+    if (finishLine && !crossedFinishLine) {
       crossedFinishLine = true;
       farFromFinishLine = false;
     }
     
-    // Check if kart has moved far enough from finish line to reset 
-    if (crossedFinishLine && !farFromFinishLine)
-    {
-      // The distance is the opposite side of the track from the finish line.
-      if (kart.position.x >= -75 && kart.position.x <= -25 && kart.position.z >= -(Track.OUTER_TRACK_HEIGHT / 2) && kart.position.z <= -(Track.INNER_TRACK_HEIGHT / 2))
-      {
-        farFromFinishLine = true;
-      }
+    if (crossedFinishLine && !farFromFinishLine && awayPoint) {
+      farFromFinishLine = true;
     }
      
-    // Complete a lap when crossing finish line after being far away 
-    if (crossedFinishLine && farFromFinishLine && finishLineX && finishLineZ)
-    {
-      // Calculate lap time
+    if (crossedFinishLine && farFromFinishLine && finishLine) {
       float currentTime = millis();
       currentLapTime = (currentTime - lapStartTime) / 1000;
-       
-      // Update lap count and times
       lapCount++;
       lastLapTime = currentLapTime;
        
-      // Update best time if this lap was faster
-      if (currentLapTime < bestLapTime)
-      {
+      if (currentLapTime < bestLapTime) {
         bestLapTime = currentLapTime;
       }
       
@@ -537,81 +539,54 @@ class Timer
       lapStartTime = currentTime;
       crossedFinishLine = false;
       farFromFinishLine = false;
-      
-      // Print lap info to console; more for early stage debugging.
-      println("Lap " + lapCount + " completed in " + nf(currentLapTime, 1, 2) + " seconds");
-      if (currentLapTime == bestLapTime)
-      {
-        println("New best time!");
-      }
     }
   }
   
-  // Displays the timers.
-  void displayTimers()
-  {         
-    // Save current camera state  
-    pushMatrix(); 
+  void displayTimers() {
+    // Save current camera state
+    pushMatrix();
    
-    // Switch to default 2D camera for text overlay  
-    camera();  
+    // Switch to default 2D camera for text overlay.
+    camera();
     hint(DISABLE_DEPTH_TEST);
     noLights();
     
-    // Displays the messages before the game has started such as space to start and a hint.
-    if(!gameStarted)
-    {
-      fill(255);  
-      textAlign(CENTER);  
-      textSize(40);
+    // Before game stars.
+    if(!gameStarted) {
+      fill(TEXT_COLOUR_WHITE);
+      textAlign(CENTER);
+      textSize(TEXT_SIZE_LARGE);
       text("SPACE to START!", width/2, height/4);
       textAlign(RIGHT);
-      textSize(16);
-      text("Hint: Hold W/UP before pressing SPACE!", width - 20, height - 30);
-    }
-    
-    // When the game starts, display all the timers.
-    else
-    {
-      // Set up text properties  
-      fill(0);  
-      textAlign(LEFT);  
-      textSize(16);
+      textSize(TEXT_SIZE_SMALL);
+      text("Hint: Hold W/UP before pressing SPACE!", width - TEXT_MARGIN, height - TEXT_LINE_HEIGHT);
+    } else { // When game starts; display timers/text.
+      fill(TEXT_COLOUR_BLACK);
+      textAlign(LEFT);
+      textSize(TEXT_SIZE_SMALL);
       
-      // Calculate current ongoing lap time  
       float ongoingTime = (millis() - lapStartTime) / 1000.0;
       
-      // Speedometer
-      final float CONVERT_TO_KMH = 5.4;
-      text("Speed: " + nf((playerKart.speed * CONVERT_TO_KMH), 1, 2) + " KM/H", 20, 30);
-     
-      // Display current lap time  
-      text("Current Lap: " + nf(ongoingTime, 1, 2) + "s", 20, 50); 
-     
-      // Display lap count  
-      text("Laps: " + lapCount, 20, 70); 
-     
-      // Display last lap time if available  
-      if (lastLapTime > 0)  
-      {  
-        text("Last Lap: " + nf(lastLapTime, 1, 2) + "s", 20, 90);  
-      } 
+      text("Speed: " + nf((playerKart.speed * CONVERT_TO_KMH), 1, 2) + " KM/H", TEXT_SIZE_SMALL, TEXT_LINE_HEIGHT);
+      text("Current Lap: " + nf(ongoingTime, 1, 2) + "s", TEXT_MARGIN, TEXT_LINE_HEIGHT + TEXT_MARGIN);
+      text("Laps: " + lapCount, TEXT_SIZE_SMALL, TEXT_LINE_HEIGHT + 2*TEXT_MARGIN);
+
+      if (lastLapTime > 0) {
+        text("Last Lap: " + nf(lastLapTime, 1, 2) + "s", TEXT_MARGIN, TEXT_LINE_HEIGHT + 3*TEXT_MARGIN); 
+      }
        
-      // Display best lap time if available  
-      if (bestLapTime < Float.MAX_VALUE)  
-      { 
-        text("Best Lap: " + nf(bestLapTime, 1, 2) + "s", 20, 110);  
+      if (bestLapTime < Float.MAX_VALUE) {
+        text("Best Lap: " + nf(bestLapTime, 1, 2) + "s", TEXT_MARGIN, TEXT_LINE_HEIGHT + 4*TEXT_MARGIN);
       }
     }
     
-    // Display controls; subtle at bottom left.
-    fill(255);
-    textAlign(LEFT);  
-    textSize(16);
-    text("Controls: WASD/Arrow Keys, SPACE to Drift, R to Reset", 20, height - 30); 
+    fill(TEXT_COLOUR_WHITE);
+    textAlign(LEFT);
+    textSize(TEXT_SIZE_SMALL);
+    text("Controls: WASD/Arrow Keys, SPACE to Drift, R to Reset", TEXT_MARGIN, height - TEXT_LINE_HEIGHT);
     lights();
-    hint(ENABLE_DEPTH_TEST);  
-    popMatrix();  
+    hint(ENABLE_DEPTH_TEST);
+    popMatrix();
   }
 }
 
@@ -691,7 +666,6 @@ void keyReleased()
   {
     resetGame();
     gameTimer.initializeTimers();
-    gameTimer.gameStarted = false;
   }
 }
 
