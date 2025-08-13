@@ -2,8 +2,9 @@ class Track {
   // Dimensions
   static final float OUTER_WIDTH = 7500f;
   static final float OUTER_HEIGHT = OUTER_WIDTH/2;
-  static final float INNER_WIDTH = OUTER_WIDTH - 1000f;
-  static final float INNER_HEIGHT = OUTER_HEIGHT - 1000f;
+  static final float TRACK_WIDTH = 1500f;
+  static final float INNER_WIDTH = OUTER_WIDTH - TRACK_WIDTH;
+  static final float INNER_HEIGHT = OUTER_HEIGHT - TRACK_WIDTH;
   static final float SIZE_OF_GROUND = 4*OUTER_WIDTH/3;
   static final int SQUARE_SIZE = 50;
   static final float NUMBER_OF_SQUARES = ((OUTER_HEIGHT - INNER_HEIGHT) / (2*SQUARE_SIZE));
@@ -228,3 +229,4 @@ class Track {
     }
   }
 }
+
