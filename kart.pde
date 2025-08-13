@@ -206,6 +206,15 @@ class Kart {
     popMatrix();
   }
   
+  void playerInput() {
+    if (!gameTimer.gameStarted) return;
+    
+    if (keyUp) playerKart.accelerate();
+    if (keyDown) playerKart.brake();
+    if (keyLeft) playerKart.turnLeft();
+    if (keyRight) playerKart.turnRight();
+  }
+  
   void display(int BODY_COLOUR) {
     drawKartBody(BODY_COLOUR);
     drawWings();
