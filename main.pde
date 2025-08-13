@@ -5,15 +5,15 @@
 // Kart
 static final float KART_STARTING_POSITION_X = 0f;
 static final float KART_STARTING_POSITION_Y = 0f;
-static final float KART_STARTING_POSITION_Z = (Track.OUTER_TRACK_HEIGHT + Track.INNER_TRACK_HEIGHT) / 4;
+static final float KART_STARTING_POSITION_Z = (Track.OUTER_HEIGHT + Track.INNER_HEIGHT) / 4;
 static final float KART_STARTING_DIRECTION = -PI/2;
 
 // Camera
 static final int BACKGROUND_COLOUR = 0xFFC3EEFA;
 static final float CAMERA_HEIGHT_RATIO = 0.0868f;
 static final float CAMERA_DISTANCE_RATIO = 0.117f;
-float CAMERA_HEIGHT;
-float CAMERA_DISTANCE;
+private float CAMERA_HEIGHT;
+private float CAMERA_DISTANCE;
 
 void setupCamera() {
   camera((playerKart.position.x - (CAMERA_DISTANCE * sin(playerKart.rotation))),   // x position of camera.
@@ -90,7 +90,7 @@ void draw() {
   gameTrack.displayTrack();
   setupCamera();
   playerInput();
-  playerKart.display();
+  playerKart.display(Kart.KART_BODY_COLOUR);
   playerKart.update();
   gameTrack.checkWallCollision(playerKart);
   gameTimer.checkFinishLine(playerKart);
