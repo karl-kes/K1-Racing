@@ -54,34 +54,25 @@ void keyReleased() {
   }
 }
 
-void playerInput() {
-  if (!gameTimer.gameStarted) return;
-  
-  if (keyUp) playerKart.accelerate();
-  if (keyDown) playerKart.brake();
-  if (keyLeft) playerKart.turnLeft();
-  if (keyRight) playerKart.turnRight();
-}
-
 Track gameTrack;
 Timer gameTimer;
 Kart playerKart;
 
 void resetGame() {
-  playerKart.position = new PVector(KART_STARTING_POSITION_X, KART_STARTING_POSITION_Y, KART_STARTING_POSITION_Z);
-  playerKart.velocity = new PVector(0, 0, 0);
+  playerKart.position.set(KART_STARTING_POSITION_X, KART_STARTING_POSITION_Y, KART_STARTING_POSITION_Z);
+  playerKart.velocity.set(0, 0, 0);
   playerKart.speed = 0;
   playerKart.rotation = KART_STARTING_DIRECTION;
 }
 
 void setup() {
   fullScreen(P3D, 1);
+  CAMERA_HEIGHT = height * CAMERA_HEIGHT_RATIO;
+  CAMERA_DISTANCE = width * CAMERA_DISTANCE_RATIO;
   gameTrack = new Track(0, 0, 0);
   playerKart = new Kart(KART_STARTING_POSITION_X, KART_STARTING_POSITION_Y, KART_STARTING_POSITION_Z);
   gameTimer = new Timer();
   gameTimer.initializeTimers();
-  CAMERA_HEIGHT = height * CAMERA_HEIGHT_RATIO;
-  CAMERA_DISTANCE = width * CAMERA_DISTANCE_RATIO;
 }
 
 void draw() { 
@@ -89,7 +80,7 @@ void draw() {
   lights();
   gameTrack.displayTrack();
   setupCamera();
-  playerInput();
+  playerKart.playerInput();
   playerKart.display(Kart.KART_BODY_COLOUR);
   playerKart.update();
   gameTrack.checkWallCollision(playerKart);
