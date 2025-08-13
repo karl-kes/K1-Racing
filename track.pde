@@ -1,12 +1,12 @@
 class Track {  
   // Dimensions
-  static final float OUTER_TRACK_WIDTH = 7500f;
-  static final float OUTER_TRACK_HEIGHT = OUTER_TRACK_WIDTH/2;
-  static final float INNER_TRACK_WIDTH = OUTER_TRACK_WIDTH - 1000f;
-  static final float INNER_TRACK_HEIGHT = OUTER_TRACK_HEIGHT - 1000f;
-  static final float SIZE_OF_GROUND = 4*OUTER_TRACK_WIDTH/3;
+  static final float OUTER_WIDTH = 7500f;
+  static final float OUTER_HEIGHT = OUTER_WIDTH/2;
+  static final float INNER_WIDTH = OUTER_WIDTH - 1000f;
+  static final float INNER_HEIGHT = OUTER_HEIGHT - 1000f;
+  static final float SIZE_OF_GROUND = 4*OUTER_WIDTH/3;
   static final int SQUARE_SIZE = 50;
-  static final float NUMBER_OF_SQUARES = ((OUTER_TRACK_HEIGHT - INNER_TRACK_HEIGHT) / (2*SQUARE_SIZE));
+  static final float NUMBER_OF_SQUARES = ((OUTER_HEIGHT - INNER_HEIGHT) / (2*SQUARE_SIZE));
   static final float BARRIER_HEIGHT = 35f;
   static final float BARRIER_THICKNESS = 6*BARRIER_HEIGHT/7;
   static final float TIRE_BOUNDARY_LENGTH = 5*BARRIER_HEIGHT/7;
@@ -31,7 +31,7 @@ class Track {
   static final float TRACK_Y = 5f;
   static final float DEG_INCREMENT = 5f;
   static final float DISTANCE_FROM_TRACK = 25f;
-  static final float STADIUM_RADIUS = OUTER_TRACK_WIDTH/2 + 500;
+  static final float STADIUM_RADIUS = OUTER_WIDTH/2 + 500;
   float offsetY = 0f;
   
   // Visuals
@@ -58,14 +58,14 @@ class Track {
     strokeWeight(TRACK_STROKE_WEIGHT);
     stroke(BOUNDARY_COLOUR);
     fill(TRACK_COLOUR);
-    ellipse(ORIGIN_X, ORIGIN_Z, OUTER_TRACK_WIDTH, OUTER_TRACK_HEIGHT);
+    ellipse(ORIGIN_X, ORIGIN_Z, OUTER_WIDTH, OUTER_HEIGHT);
   }
   
   private void drawLaneMarkings() {
     stroke(LANE_MARKING_COLOUR);
-    ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_TRACK_WIDTH + INNER_TRACK_WIDTH) / 2, (OUTER_TRACK_HEIGHT + INNER_TRACK_HEIGHT) / 2);
-    ellipse(ORIGIN_X, ORIGIN_Z, (3*OUTER_TRACK_WIDTH + INNER_TRACK_WIDTH) / 4, (3*OUTER_TRACK_HEIGHT + INNER_TRACK_HEIGHT) / 4);
-    ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_TRACK_WIDTH + 3*INNER_TRACK_WIDTH) / 4, (OUTER_TRACK_HEIGHT + 3*INNER_TRACK_HEIGHT) / 4);
+    ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_WIDTH + INNER_WIDTH) / 2, (OUTER_HEIGHT + INNER_HEIGHT) / 2);
+    ellipse(ORIGIN_X, ORIGIN_Z, (3*OUTER_WIDTH + INNER_WIDTH) / 4, (3*OUTER_HEIGHT + INNER_HEIGHT) / 4);
+    ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_WIDTH + 3*INNER_WIDTH) / 4, (OUTER_HEIGHT + 3*INNER_HEIGHT) / 4);
     popMatrix();
   }
   
@@ -75,7 +75,7 @@ class Track {
     rotateX(PI/2);
     stroke(BOUNDARY_COLOUR);
     fill(GROUND_COLOUR);
-    ellipse(ORIGIN_X, ORIGIN_Z, INNER_TRACK_WIDTH, INNER_TRACK_HEIGHT);
+    ellipse(ORIGIN_X, ORIGIN_Z, INNER_WIDTH, INNER_HEIGHT);
     popMatrix(); 
   }
   
@@ -95,7 +95,7 @@ class Track {
       pushMatrix();
       noLights();
       offsetY = 1f;
-      translate(-row*SQUARE_SIZE, TRACK_Y + offsetY, OUTER_TRACK_HEIGHT/2);
+      translate(-row*SQUARE_SIZE, TRACK_Y + offsetY, OUTER_HEIGHT/2);
       rotateX(PI/2);
       noStroke();
       
@@ -121,11 +121,11 @@ class Track {
     for (int angleDeg = 0; angleDeg < 360; angleDeg += 5) {
       // Current and next variables.
       float angleRad = radians(angleDeg);
-      float x = cos(angleRad) * (OUTER_TRACK_WIDTH/2 + DISTANCE_FROM_TRACK);
-      float z = sin(angleRad) * (OUTER_TRACK_HEIGHT/2 + DISTANCE_FROM_TRACK);
+      float x = cos(angleRad) * (OUTER_WIDTH/2 + DISTANCE_FROM_TRACK);
+      float z = sin(angleRad) * (OUTER_HEIGHT/2 + DISTANCE_FROM_TRACK);
       float nextAngle = radians(angleDeg + DEG_INCREMENT);
-      float nextX = cos(nextAngle) * (OUTER_TRACK_WIDTH/2 + DISTANCE_FROM_TRACK);
-      float nextZ = sin(nextAngle) * (OUTER_TRACK_HEIGHT/2 + DISTANCE_FROM_TRACK);
+      float nextX = cos(nextAngle) * (OUTER_WIDTH/2 + DISTANCE_FROM_TRACK);
+      float nextZ = sin(nextAngle) * (OUTER_HEIGHT/2 + DISTANCE_FROM_TRACK);
       
       pushMatrix(); 
       translate((x + nextX)/2, TRACK_Y - BARRIER_HEIGHT/2, (z + nextZ)/2);
@@ -147,8 +147,8 @@ class Track {
     // Inner barrier; stacked tires.
     for (int angleDeg = 0; angleDeg < 360; angleDeg += 1) {
       float angleRad = radians(angleDeg);
-      float x = cos(angleRad) * (INNER_TRACK_WIDTH/2 - DISTANCE_FROM_TRACK);
-      float z = sin(angleRad) * (INNER_TRACK_HEIGHT/2 - DISTANCE_FROM_TRACK);
+      float x = cos(angleRad) * (INNER_WIDTH/2 - DISTANCE_FROM_TRACK);
+      float z = sin(angleRad) * (INNER_HEIGHT/2 - DISTANCE_FROM_TRACK);
       
       // Simple stacked tire boxes
       for (int i = 0; i < 2; i++) {
@@ -178,7 +178,7 @@ class Track {
         
         // Calculate position for this row
         float rowX = cos(angleRad) * (STADIUM_RADIUS + rowOffset);
-        float rowZ = sin(angleRad) * ((STADIUM_RADIUS + rowOffset) * (OUTER_TRACK_HEIGHT / (float)OUTER_TRACK_WIDTH));
+        float rowZ = sin(angleRad) * ((STADIUM_RADIUS + rowOffset) * (OUTER_HEIGHT / (float)OUTER_WIDTH));
         
         translate(rowX, TRACK_Y - rowHeight, rowZ);
         
@@ -214,8 +214,8 @@ class Track {
   // Checks to see whether or not the kart collides with the track borders.
   void checkWallCollision(Kart kart) {
     // Checks user equation of an ellipse.
-    float outerCheck = sq(kart.position.x / (Track.OUTER_TRACK_WIDTH / 2)) + sq(kart.position.z / (Track.OUTER_TRACK_HEIGHT / 2));
-    float innerCheck = sq(kart.position.x / (Track.INNER_TRACK_WIDTH / 2)) + sq(kart.position.z / (Track.INNER_TRACK_HEIGHT / 2));
+    float outerCheck = sq(kart.position.x / (Track.OUTER_WIDTH / 2)) + sq(kart.position.z / (Track.OUTER_HEIGHT / 2));
+    float innerCheck = sq(kart.position.x / (Track.INNER_WIDTH / 2)) + sq(kart.position.z / (Track.INNER_HEIGHT / 2));
     
     // If the equation of the outer ellipse is slighty greater than 1, it brings the kart back by bouncing it in. If slightly less than 1 also pulls in.
     if (outerCheck >= TRACK_OUTER_BOUNDARY) {
