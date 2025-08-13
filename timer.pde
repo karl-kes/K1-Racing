@@ -50,15 +50,15 @@ class Timer {
   private boolean isAtFinishLine(Kart kart) {
     return (kart.position.x >= -Track.SQUARE_SIZE - finishLineRange &&
             kart.position.x <= -Track.SQUARE_SIZE + finishLineRange &&
-            kart.position.z >= Track.INNER_TRACK_HEIGHT/2 &&
-            kart.position.z <= Track.OUTER_TRACK_HEIGHT/2);
+            kart.position.z >= Track.INNER_HEIGHT/2 &&
+            kart.position.z <= Track.OUTER_HEIGHT/2);
   }
   
   private boolean isAwayFromFinishLine(Kart kart) {
     return (kart.position.x >= -Track.SQUARE_SIZE - finishLineRange && 
             kart.position.x <= -Track.SQUARE_SIZE + finishLineRange && 
-            kart.position.z >= -Track.OUTER_TRACK_HEIGHT/2 && 
-            kart.position.z <= -Track.INNER_TRACK_HEIGHT/2);
+            kart.position.z >= -Track.OUTER_HEIGHT/2 && 
+            kart.position.z <= -Track.INNER_HEIGHT/2);
   }
   
   void checkFinishLine(Kart kart) {
