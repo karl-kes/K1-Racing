@@ -14,8 +14,8 @@ class Kart {
   static final float COCKPIT_LENGTH = 3*KART_LENGTH/10;
   
   // Physics
-  PVector velocity;
-  float speed;
+  private PVector velocity;
+  private float speed;
   static final float FRICTION = 0.98f;
   static final float MAX_SPEED = (30 / FRICTION);
   static final float ACCELERATION = (0.4 / FRICTION);
@@ -28,8 +28,8 @@ class Kart {
   private PVector intendedVelocity = new PVector();
   
   // Positions
-  PVector position;
-  float rotation = -PI/2;
+  private PVector position;
+  private float rotation = -PI/2;
   static final float KART_BODY_X = 0f;
   static final float KART_BODY_Z = 2f;
   static final float WING_X = 0f;
@@ -48,8 +48,8 @@ class Kart {
   static final int BURNING_TIRE_COLOUR_2 = 0xFFA03010;
   static final int BURNING_TIRE_COLOUR_3 = 0xFFFF4500;
   static final int COCKPIT_COLOUR = 0xFF0064C8;
-  float driftStartTime = 0;
-  boolean wasDrifting = false;
+  private float driftStartTime = 0;
+  private boolean wasDrifting = false;
   
   Kart(float x, float y, float z) { 
     position = new PVector(x, y, z);
@@ -119,11 +119,11 @@ class Kart {
     }
   }
   
-  private void drawKartBody() {
+  private void drawKartBody(int BODY_COLOUR) {
     translate(position.x, position.y, position.z);
     rotateY(rotation);
     
-    fill(KART_BODY_COLOUR);
+    fill(BODY_COLOUR);
     noStroke();
     
     float sectionLengthOffsetFactor = 0.5f;
@@ -206,8 +206,8 @@ class Kart {
     popMatrix();
   }
   
-  void display() {
-    drawKartBody();
+  void display(int BODY_COLOUR) {
+    drawKartBody(BODY_COLOUR);
     drawWings();
     drawTires();
     drawCockPit();
