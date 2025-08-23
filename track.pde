@@ -51,73 +51,73 @@ class Track {
     position = new PVector(x, y, z);
   }
   
-  private void drawOuterTrack() {
-    pushMatrix();
+  private void drawOuterTrack(PGraphics pg) {
+    pg.pushMatrix();
     offsetY = 3f;
-    translate(ORIGIN_X, TRACK_Y + offsetY, ORIGIN_Z);
-    rotateX(PI/2);
-    strokeWeight(TRACK_STROKE_WEIGHT);
-    stroke(BOUNDARY_COLOUR);
-    fill(TRACK_COLOUR);
-    ellipse(ORIGIN_X, ORIGIN_Z, OUTER_WIDTH, OUTER_HEIGHT);
+    pg.translate(ORIGIN_X, TRACK_Y + offsetY, ORIGIN_Z);
+    pg.rotateX(PI/2);
+    pg.strokeWeight(TRACK_STROKE_WEIGHT);
+    pg.stroke(BOUNDARY_COLOUR);
+    pg.fill(TRACK_COLOUR);
+    pg.ellipse(ORIGIN_X, ORIGIN_Z, OUTER_WIDTH, OUTER_HEIGHT);
   }
   
-  private void drawLaneMarkings() {
-    stroke(LANE_MARKING_COLOUR);
-    ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_WIDTH + INNER_WIDTH) / 2, (OUTER_HEIGHT + INNER_HEIGHT) / 2);
-    ellipse(ORIGIN_X, ORIGIN_Z, (3*OUTER_WIDTH + INNER_WIDTH) / 4, (3*OUTER_HEIGHT + INNER_HEIGHT) / 4);
-    ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_WIDTH + 3*INNER_WIDTH) / 4, (OUTER_HEIGHT + 3*INNER_HEIGHT) / 4);
-    popMatrix();
+  private void drawLaneMarkings(PGraphics pg) {
+    pg.stroke(LANE_MARKING_COLOUR);
+    pg.ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_WIDTH + INNER_WIDTH) / 2, (OUTER_HEIGHT + INNER_HEIGHT) / 2);
+    pg.ellipse(ORIGIN_X, ORIGIN_Z, (3*OUTER_WIDTH + INNER_WIDTH) / 4, (3*OUTER_HEIGHT + INNER_HEIGHT) / 4);
+    pg.ellipse(ORIGIN_X, ORIGIN_Z, (OUTER_WIDTH + 3*INNER_WIDTH) / 4, (OUTER_HEIGHT + 3*INNER_HEIGHT) / 4);
+    pg.popMatrix();
   }
   
-  private void drawInnerTrack() {
-    pushMatrix();
-    translate(ORIGIN_X, TRACK_Y, ORIGIN_Z);
-    rotateX(PI/2);
-    stroke(BOUNDARY_COLOUR);
-    fill(GROUND_COLOUR);
-    ellipse(ORIGIN_X, ORIGIN_Z, INNER_WIDTH, INNER_HEIGHT);
-    popMatrix(); 
+  private void drawInnerTrack(PGraphics pg) {
+    pg.pushMatrix();
+    pg.translate(ORIGIN_X, TRACK_Y, ORIGIN_Z);
+    pg.rotateX(PI/2);
+    pg.stroke(BOUNDARY_COLOUR);
+    pg.fill(GROUND_COLOUR);
+    pg.ellipse(ORIGIN_X, ORIGIN_Z, INNER_WIDTH, INNER_HEIGHT);
+    pg.popMatrix(); 
   }
   
-  private void drawGround() {    
-    pushMatrix();
+  private void drawGround(PGraphics pg) {    
+    pg.pushMatrix();
     offsetY = 5f;
-    translate(ORIGIN_X, TRACK_Y + offsetY, ORIGIN_Z);
-    fill(GROUND_COLOUR);
-    noStroke();
-    rotateX(PI/2);
-    ellipse(ORIGIN_X, ORIGIN_Z, SIZE_OF_GROUND, SIZE_OF_GROUND/2);
-    popMatrix(); 
+    pg.translate(ORIGIN_X, TRACK_Y + offsetY, ORIGIN_Z);
+    pg.fill(GROUND_COLOUR);
+    pg.noStroke();
+    pg.rotateX(PI/2);
+    pg.ellipse(ORIGIN_X, ORIGIN_Z, SIZE_OF_GROUND, SIZE_OF_GROUND/2);
+    pg.popMatrix(); 
   }
   
-  private void drawFinishLine() {
+  private void drawFinishLine(PGraphics pg) {
     for (int row = 1; row < 3; row++) {
-      pushMatrix();
-      noLights();
+      pg.pushMatrix();
+      pg.noLights();
       offsetY = 1f;
-      translate(-row*SQUARE_SIZE, TRACK_Y + offsetY, OUTER_HEIGHT/2);
-      rotateX(PI/2);
-      noStroke();
+      pg.translate(-row*SQUARE_SIZE, TRACK_Y + offsetY, OUTER_HEIGHT/2);
+      pg.rotateX(PI/2);
+      pg.noStroke();
       
       // Draws the appropriate number of boxes and splits the gaps for alternating black and white.
       for(int i = 1; i <= NUMBER_OF_SQUARES; i++) {
         if ((i + row) % 2 == 0) {
-          fill(#FFFFFF);
-          rect(0, (-SQUARE_SIZE)*i, SQUARE_SIZE, SQUARE_SIZE);
+          pg.fill(#FFFFFF);
+          pg.rect(0, (-SQUARE_SIZE)*i, SQUARE_SIZE, SQUARE_SIZE);
         } else { 
-          fill(#000000);
-          rect(0, (-SQUARE_SIZE)*i, SQUARE_SIZE, SQUARE_SIZE);
+          pg.fill(#000000);
+          pg.rect(0, (-SQUARE_SIZE)*i, SQUARE_SIZE, SQUARE_SIZE);
         }
       }
       
-      lights();
-      popMatrix();
+      pg.lights();
+      pg.popMatrix();
     }
   }
   
   // Displays the F1 style walls.
-  private void drawWalls() {
+  private void drawWalls(PGraphics pg) {
     // Outer barrier; red and white striped like F1
     for (int angleDeg = 0; angleDeg < 360; angleDeg += 5) {
       // Current and next variables.
@@ -128,21 +128,21 @@ class Track {
       float nextX = cos(nextAngle) * (OUTER_WIDTH/2 + DISTANCE_FROM_TRACK);
       float nextZ = sin(nextAngle) * (OUTER_HEIGHT/2 + DISTANCE_FROM_TRACK);
       
-      pushMatrix(); 
-      translate((x + nextX)/2, TRACK_Y - BARRIER_HEIGHT/2, (z + nextZ)/2);
+      pg.pushMatrix(); 
+      pg.translate((x + nextX)/2, TRACK_Y - BARRIER_HEIGHT/2, (z + nextZ)/2);
       
       // Alternate red and white sections
       if ((angleDeg / 5) % 2 == 0) {
-        fill(BOUNDARY_COLOUR_RED);
+        pg.fill(BOUNDARY_COLOUR_RED);
       } else {
-        fill(BOUNDARY_COLOUR);
+        pg.fill(BOUNDARY_COLOUR);
       }
       
-      noStroke();
+      pg.noStroke();
       float barrierLength = dist(x, z, nextX, nextZ);
-      rotateY(atan2(nextX - x, nextZ - z));
-      box(BARRIER_THICKNESS, BARRIER_HEIGHT, barrierLength);
-      popMatrix();
+      pg.rotateY(atan2(nextX - x, nextZ - z));
+      pg.box(BARRIER_THICKNESS, BARRIER_HEIGHT, barrierLength);
+      pg.popMatrix();
     }
     
     // Inner barrier; stacked tires.
@@ -153,25 +153,25 @@ class Track {
       
       // Simple stacked tire boxes
       for (int i = 0; i < 2; i++) {
-        pushMatrix();
-        translate(x, TRACK_Y + (i * 15) - 15, z);
-        fill(TIRE_COLOUR);
-        noStroke();
-        box(TIRE_BOUNDARY_LENGTH, TIRE_BOUNDARY_HEIGHT, TIRE_BOUNDARY_LENGTH);
-        popMatrix();
+        pg.pushMatrix();
+        pg.translate(x, TRACK_Y + (i * 15) - 15, z);
+        pg.fill(TIRE_COLOUR);
+        pg.noStroke();
+        pg.box(TIRE_BOUNDARY_LENGTH, TIRE_BOUNDARY_HEIGHT, TIRE_BOUNDARY_LENGTH);
+        pg.popMatrix();
       }
     }
   }
   
   // Draws the bleachers.
-  private void drawStadium() {    
+  private void drawStadium(PGraphics pg) {    
     // Create bleachers in sections around the track - smaller ANGLE increment for continuous connection
     for (int angleDeg = 0; angleDeg < 360; angleDeg += 1) {
       float angleRad = radians(angleDeg);
       
       // Create multiple rows of bleachers
       for (int row = 0; row < BLEACHER_ROWS; row++) {
-        pushMatrix();
+        pg.pushMatrix();
         
         // Position each row further back and higher up
         float rowOffset = row * BLEACHER_DEPTH * BLEACHER_DEPTH_OFFSET_FACTOR;
@@ -181,35 +181,35 @@ class Track {
         float rowX = cos(angleRad) * (STADIUM_RADIUS + rowOffset);
         float rowZ = sin(angleRad) * ((STADIUM_RADIUS + rowOffset) * (OUTER_HEIGHT / (float)OUTER_WIDTH));
         
-        translate(rowX, TRACK_Y - rowHeight, rowZ);
+        pg.translate(rowX, TRACK_Y - rowHeight, rowZ);
         
         // Alternate colors for visual interest
         if (row % 2 == 0) {
-          fill(BLEACHER_COLOUR_LIGHT);
+          pg.fill(BLEACHER_COLOUR_LIGHT);
         } else {
-          fill(BLEACHER_COLOUR_DARK);
+          pg.fill(BLEACHER_COLOUR_DARK);
         }
         
         // Rotate to face the track center
-        rotateY(atan2(-rowX, -rowZ));
+        pg.rotateY(atan2(-rowX, -rowZ));
         
-        noStroke();
+        pg.noStroke();
         // Make boxes wider to ensure complete connection
-        box(BLEACHER_THICKNESS, BLEACHER_HEIGHT, BLEACHER_DEPTH);
-        popMatrix();
+        pg.box(BLEACHER_THICKNESS, BLEACHER_HEIGHT, BLEACHER_DEPTH);
+        pg.popMatrix();
       }
     }
   }
   
   // Displays the track.
-  void displayTrack() {
-    drawOuterTrack();
-    drawLaneMarkings();
-    drawInnerTrack();
-    drawGround();
-    drawFinishLine();
-    drawWalls();
-    drawStadium();
+  void displayTrack(PGraphics pg) {
+    drawOuterTrack(pg);
+    drawLaneMarkings(pg);
+    drawInnerTrack(pg);
+    drawGround(pg);
+    drawFinishLine(pg);
+    drawWalls(pg);
+    drawStadium(pg);
   }
   
   // Checks to see whether or not the kart collides with the track borders.
@@ -229,4 +229,3 @@ class Track {
     }
   }
 }
-
