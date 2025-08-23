@@ -14,8 +14,8 @@ class Kart {
   static final float COCKPIT_LENGTH = 3*KART_LENGTH/10;
   
   // Physics
-  private PVector velocity;
-  private float speed;
+  PVector velocity;
+  float speed;
   static final float FRICTION = 0.98f;
   static final float MAX_SPEED = (30 / FRICTION);
   static final float ACCELERATION = (0.4 / FRICTION);
@@ -24,12 +24,12 @@ class Kart {
   static final float VEL_LERP_FACTOR = 0.015f;
   static final float DRIFT_SPEED_FACTOR = 0.99f;
   static final float DRIFT_TURN_FACTOR = 1.5f;
-  private PVector intendedDirection = new PVector();
-  private PVector intendedVelocity = new PVector();
+  PVector intendedDirection = new PVector();
+  PVector intendedVelocity = new PVector();
   
   // Positions
-  private PVector position;
-  private float rotation = -PI/2;
+  PVector position;
+  float rotation = -PI/2;
   static final float KART_BODY_X = 0f;
   static final float KART_BODY_Z = 2f;
   static final float WING_X = 0f;
@@ -41,7 +41,8 @@ class Kart {
   static final float COCKPIT_Z = 5f;
   
   // Visuals
-  static final int KART_BODY_COLOUR = 0xFFFF0000;
+  static final int KART_BODY_COLOUR = 0xFFFF0000;        // Red for Player 1
+  static final int KART_BODY_COLOUR_P2 = 0xFF0000FF;     // Blue for Player 2
   static final int KART_WING_COLOUR = 0xFF646464;
   static final int TIRE_COLOUR = 0xFF000000;
   static final int BURNING_TIRE_COLOUR_1 = 0xFF802010;
@@ -50,6 +51,9 @@ class Kart {
   static final int COCKPIT_COLOUR = 0xFF0064C8;
   private float driftStartTime = 0;
   private boolean wasDrifting = false;
+  
+  // Player-specific drift state
+  private boolean isDrifting = false;
   
   Kart(float x, float y, float z) { 
     position = new PVector(x, y, z);
@@ -66,7 +70,7 @@ class Kart {
     intendedVelocity.set(intendedDirection).mult(speed);
     
     // If not drifting, snap velocity to intended direction (strong grip)
-    if (!keySpace) {
+    if (!isDrifting) {
       velocity.set(intendedVelocity);
     } else {
       // If drifting, blend between current velocity and intended velocity
@@ -103,7 +107,7 @@ class Kart {
   void turnLeft() {
     rotation += TURN_SPEED;
     
-    if (keySpace == true) {
+    if (isDrifting) {
       rotation += TURN_SPEED/DRIFT_TURN_FACTOR;
       speed *= DRIFT_SPEED_FACTOR;
     }
@@ -113,53 +117,64 @@ class Kart {
   void turnRight() {
     rotation -= TURN_SPEED;
     
-    if (keySpace == true) {
+    if (isDrifting) {
       rotation -= TURN_SPEED/DRIFT_TURN_FACTOR;
       speed *= DRIFT_SPEED_FACTOR;
     }
   }
   
-  private void drawKartBody(int BODY_COLOUR) {
-    translate(position.x, position.y, position.z);
-    rotateY(rotation);
+  private void drawKartBody(PGraphics pg, int BODY_COLOUR) {
+    pg.pushMatrix();
+    pg.translate(position.x, position.y, position.z);
+    pg.rotateY(rotation);
     
-    fill(BODY_COLOUR);
-    noStroke();
+    pg.fill(BODY_COLOUR);
+    pg.noStroke();
     
     float sectionLengthOffsetFactor = 0.5f;
     float kartWidthOffsetFactor = 8f;
     
     for (int kartSection = 1; kartSection < 6; kartSection++) {
-      pushMatrix();
-      translate(KART_BODY_X, KART_BODY_Z, KART_LENGTH/2 - SECTION_LENGTH * sectionLengthOffsetFactor);
-      box(KART_WIDTH - kartWidthOffsetFactor, KART_HEIGHT, SECTION_LENGTH);
+      pg.pushMatrix();
+      pg.translate(KART_BODY_X, KART_BODY_Z, KART_LENGTH/2 - SECTION_LENGTH * sectionLengthOffsetFactor);
+      pg.box(KART_WIDTH - kartWidthOffsetFactor, KART_HEIGHT, SECTION_LENGTH);
       kartWidthOffsetFactor -= 4;
       sectionLengthOffsetFactor += 1;
-      popMatrix();
+      pg.popMatrix();
     }
+    pg.popMatrix();
   }
   
-  private void drawWings() {
+  private void drawWings(PGraphics pg) {
+    pg.pushMatrix();
+    pg.translate(position.x, position.y, position.z);
+    pg.rotateY(rotation);
+    
     float wingOffsetY = 8f;
     float wingWidthOffset = 10f;
-    fill(KART_WING_COLOUR);
+    pg.fill(KART_WING_COLOUR);
     
     for (int i = 1; i > -2; i -= 2) {
-      pushMatrix();
-      translate(WING_X, wingOffsetY, i * (KART_LENGTH/2 + WING_Z_OFFSET));
-      box(KART_WIDTH + wingWidthOffset, WING_HEIGHT, WING_LENGTH);
-      popMatrix();
+      pg.pushMatrix();
+      pg.translate(WING_X, wingOffsetY, i * (KART_LENGTH/2 + WING_Z_OFFSET));
+      pg.box(KART_WIDTH + wingWidthOffset, WING_HEIGHT, WING_LENGTH);
+      pg.popMatrix();
       wingWidthOffset *= 2;
       wingOffsetY = -6f;
     }
+    pg.popMatrix();
   }
   
-  private void drawTires() {
+  private void drawTires(PGraphics pg) {
+    pg.pushMatrix();
+    pg.translate(position.x, position.y, position.z);
+    pg.rotateY(rotation);
+    
     float tireOffset = 2f;
     float xFrontOrRearFactor = 1f;
     float zFrontOrRearFactor = 1f;
     
-    if (keySpace == true) {
+    if (isDrifting) {
       if (wasDrifting == false) {
         driftStartTime = millis();
         wasDrifting = true;
@@ -168,16 +183,16 @@ class Kart {
       float driftDuration = (millis() - driftStartTime) / 1000.0;
       
       if (driftDuration > 2.5) {
-        fill(BURNING_TIRE_COLOUR_3);
+        pg.fill(BURNING_TIRE_COLOUR_3);
       } else if (driftDuration > 1.5) {
-        fill(BURNING_TIRE_COLOUR_2);
+        pg.fill(BURNING_TIRE_COLOUR_2);
       } else if (driftDuration > 0.5) {
-        fill(BURNING_TIRE_COLOUR_1);
+        pg.fill(BURNING_TIRE_COLOUR_1);
       } else {
-        fill(TIRE_COLOUR);
+        pg.fill(TIRE_COLOUR);
       }
     } else {
-      fill(TIRE_COLOUR);
+      pg.fill(TIRE_COLOUR);
       wasDrifting = false;
     }
     
@@ -191,34 +206,51 @@ class Kart {
         tireOffset = 6f;
       }
       
-      pushMatrix();
-      translate(xFrontOrRearFactor * (KART_WIDTH/2 + tireOffset), TIRE_Y, zFrontOrRearFactor * TIRE_Z);
-      box(TIRE_WIDTH, TIRE_HEIGHT, TIRE_LENGTH);
-      popMatrix();
+      pg.pushMatrix();
+      pg.translate(xFrontOrRearFactor * (KART_WIDTH/2 + tireOffset), TIRE_Y, zFrontOrRearFactor * TIRE_Z);
+      pg.box(TIRE_WIDTH, TIRE_HEIGHT, TIRE_LENGTH);
+      pg.popMatrix();
+    }
+    pg.popMatrix();
+  }
+  
+  private void drawCockPit(PGraphics pg) {
+    pg.pushMatrix();
+    pg.translate(position.x, position.y, position.z);
+    pg.rotateY(rotation);
+    
+    pg.fill(COCKPIT_COLOUR);
+    pg.pushMatrix();
+    pg.translate(COCKPIT_X, COCKPIT_Y, COCKPIT_Z);
+    pg.box(COCKPIT_WIDTH, COCKPIT_HEIGHT, COCKPIT_LENGTH);
+    pg.popMatrix();
+    pg.popMatrix();
+  }
+  
+  void playerInput(int playerNum) {
+    if (!gameTimer.gameStarted) return;
+    
+    if (playerNum == 1) {
+      // Player 1 controls (WASD + Space)
+      if (keyUp) accelerate();
+      if (keyDown) brake();
+      if (keyLeft) turnLeft();
+      if (keyRight) turnRight();
+      isDrifting = keySpace;
+    } else {
+      // Player 2 controls (Arrow keys + Shift)
+      if (arrowUp) accelerate();
+      if (arrowDown) brake();
+      if (arrowLeft) turnLeft();
+      if (arrowRight) turnRight();
+      isDrifting = keyShift;
     }
   }
   
-  private void drawCockPit() {
-    fill(COCKPIT_COLOUR);
-    pushMatrix();
-    translate(COCKPIT_X, COCKPIT_Y, COCKPIT_Z);
-    box(COCKPIT_WIDTH, COCKPIT_HEIGHT, COCKPIT_LENGTH);
-    popMatrix();
-  }
-  
-  void playerInput() {
-    if (!gameTimer.gameStarted) return;
-    
-    if (keyUp) playerKart.accelerate();
-    if (keyDown) playerKart.brake();
-    if (keyLeft) playerKart.turnLeft();
-    if (keyRight) playerKart.turnRight();
-  }
-  
-  void display(int BODY_COLOUR) {
-    drawKartBody(BODY_COLOUR);
-    drawWings();
-    drawTires();
-    drawCockPit();
+  void display(PGraphics pg, int BODY_COLOUR) {
+    drawKartBody(pg, BODY_COLOUR);
+    drawWings(pg);
+    drawTires(pg);
+    drawCockPit(pg);
   }
 }
