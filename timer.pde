@@ -102,6 +102,58 @@ class Timer {
     }
   }
   
+  void displayTimersCasual() {
+    // Save current camera state
+    pushMatrix();
+   
+    // Switch to default 2D camera for text overlay.
+    camera();
+    hint(DISABLE_DEPTH_TEST);
+    noLights();
+    
+    // Before game starts.
+    if(!gameStarted) {
+      fill(TEXT_COLOUR_WHITE);
+      textAlign(CENTER);
+      textSize(TEXT_SIZE_LARGE);
+      text("SPACE to START!", width/2, height/3);
+      textSize(TEXT_SIZE_MEDIUM);
+      text("Controls: WASD or Arrow Keys + V or / to drift", width/2, height/2);
+      textAlign(RIGHT);
+      textSize(TEXT_SIZE_SMALL);
+      text("R to Reset | M for Menu", width - TEXT_MARGIN, height - TEXT_LINE_HEIGHT);
+    } else {
+      // Single player stats (centered at top)
+      fill(TEXT_COLOUR_WHITE);
+      textAlign(CENTER);
+      textSize(TEXT_SIZE_MEDIUM);
+      
+      float ongoingTime = (millis() - lapStartTime[0]) / 1000.0;
+      text("Speed: " + nf((player1Kart.speed * CONVERT_TO_KMH), 1, 2) + " KM/H", width/2, TEXT_LINE_HEIGHT);
+      text("Current: " + nf(ongoingTime, 1, 2) + "s", width/2, TEXT_LINE_HEIGHT * 2);
+      text("Laps: " + lapCount[0], width/2, TEXT_LINE_HEIGHT * 3);
+
+      if (lastLapTime[0] > 0) {
+        text("Last Lap: " + nf(lastLapTime[0], 1, 2) + "s", width/2, TEXT_LINE_HEIGHT * 4); 
+      }
+       
+      if (bestLapTime[0] < Float.MAX_VALUE) {
+        fill(TEXT_COLOUR_RED);
+        text("Best Lap: " + nf(bestLapTime[0], 1, 2) + "s", width/2, TEXT_LINE_HEIGHT * 5);
+      }
+      
+      // Controls reminder
+      fill(TEXT_COLOUR_WHITE);
+      textAlign(RIGHT);
+      textSize(TEXT_SIZE_SMALL);
+      text("R to Reset | M for Menu", width - TEXT_MARGIN, height - TEXT_LINE_HEIGHT);
+    }
+    
+    lights();
+    hint(ENABLE_DEPTH_TEST);
+    popMatrix();
+  }
+  
   void displayTimers() {
     // Save current camera state
     pushMatrix();
@@ -118,11 +170,11 @@ class Timer {
       textSize(TEXT_SIZE_LARGE);
       text("SPACE to START!", width/2, height/3);
       textSize(TEXT_SIZE_MEDIUM);
-      text("Player 1 (Red): WASD + SPACE to drift", width/2, height/2);
-      text("Player 2 (Blue): Arrow Keys + SHIFT to drift", width/2, height/2 + TEXT_LINE_HEIGHT + 10);
+      text("Player 1 (Red): WASD + V to drift", width/2, height/2);
+      text("Player 2 (Blue): Arrow Keys + / to drift", width/2, height/2 + TEXT_LINE_HEIGHT + 10);
       textAlign(RIGHT);
       textSize(TEXT_SIZE_SMALL);
-      text("R to Reset", width - TEXT_MARGIN, height - TEXT_LINE_HEIGHT);
+      text("R to Reset | M for Menu", width - TEXT_MARGIN, height - TEXT_LINE_HEIGHT);
     } else {
       // Player 1 stats (left side)
       fill(TEXT_COLOUR_WHITE);
@@ -166,6 +218,11 @@ class Timer {
       stroke(TEXT_COLOUR_WHITE);
       line(width/2, 0, width/2, height);
       noStroke();
+      
+      // Controls reminder
+      textAlign(CENTER);
+      textSize(TEXT_SIZE_SMALL);
+      text("R to Reset | M for Menu", width/2, height - TEXT_LINE_HEIGHT);
     }
     
     lights();
