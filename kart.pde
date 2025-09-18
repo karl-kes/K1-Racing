@@ -231,19 +231,19 @@ class Kart {
     if (!gameTimer.gameStarted) return;
     
     if (playerNum == 1) {
-      // Player 1 controls (WASD + Space)
+      // Player 1 controls (WASD + V)
       if (keyUp) accelerate();
       if (keyDown) brake();
       if (keyLeft) turnLeft();
       if (keyRight) turnRight();
-      isDrifting = keySpace;
+      isDrifting = keyV;
     } else {
-      // Player 2 controls (Arrow keys + Shift)
+      // Player 2 controls (Arrow keys + /)
       if (arrowUp) accelerate();
       if (arrowDown) brake();
       if (arrowLeft) turnLeft();
       if (arrowRight) turnRight();
-      isDrifting = keyShift;
+      isDrifting = keySlash;
     }
   }
   
